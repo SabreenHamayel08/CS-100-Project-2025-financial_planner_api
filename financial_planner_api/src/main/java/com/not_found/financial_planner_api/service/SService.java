@@ -3,6 +3,7 @@ package com.not_found.financial_planner_api.service;
 import com.not_found.financial_planner_api.data.SampleData;
 import com.not_found.financial_planner_api.model.Account;
 import com.not_found.financial_planner_api.model.Transaction;
+import com.not_found.financial_planner_api.categorization.service.TransactionCategorizationService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -12,9 +13,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class SampleDataService {
+public class SService {
     private List<Account> accounts;
     private List<Transaction> transactions;
+    private final TransactionCategorizationService categorizationService;
+
+    public SService() {
+        this.categorizationService = new TransactionCategorizationService(SampleData.getMerchantCategories());
+    }
 
     @PostConstruct
     public void init() {
@@ -61,29 +67,6 @@ public class SampleDataService {
     }
 
     private Map<String, Double> categorize(List<Transaction> txs) {
-        Map<String, Double> categories = new java.util.LinkedHashMap<>();
-        categories.put("Food & Groceries", 0.0);
-        categories.put("Gas", 0.0);
-        categories.put("Bills", 0.0);
-        categories.put("Entertainment", 0.0);
-        categories.put("Other", 0.0);
-
-        for (Transaction t : txs) {
-            if (t.getAmount() >= 0) continue;
-            String desc = (t.getDescription() == null) ? "" : t.getDescription().toLowerCase();
-            double amt = Math.abs(t.getAmount());
-            if (desc.contains("whole") || desc.contains("trader") || desc.contains("jewel") || desc.contains("food") || desc.contains("grocery")) {
-                categories.put("Food & Groceries", categories.get("Food & Groceries") + amt);
-            } else if (desc.contains("gas")) {
-                categories.put("Gas", categories.get("Gas") + amt);
-            } else if (desc.contains("netflix") || desc.contains("entertain")) {
-                categories.put("Entertainment", categories.get("Entertainment") + amt);
-            } else if (desc.contains("bill") || desc.contains("payment") || desc.contains("deposit") || desc.contains("atm")) {
-                categories.put("Bills", categories.get("Bills") + amt);
-            } else {
-                categories.put("Other", categories.get("Other") + amt);
-            }
-        }
-        return categories;
+        return categorizationService.categorizeTransactions(txs);
     }
 }

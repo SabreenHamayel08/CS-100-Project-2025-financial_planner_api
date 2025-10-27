@@ -2,7 +2,7 @@ package com.not_found.financial_planner_api.controller;
 
 import com.not_found.financial_planner_api.model.Account;
 import com.not_found.financial_planner_api.model.Transaction;
-import com.not_found.financial_planner_api.service.SampleDataService;
+import com.not_found.financial_planner_api.service.SService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +14,9 @@ import java.util.List;
 @RequestMapping("/api")
 public class ApiController {
 
-    private final SampleDataService dataService;
+    private final SService dataService;
 
-    public ApiController(SampleDataService dataService) {
+    public ApiController(SService dataService) {
         this.dataService = dataService;
     }
 
@@ -40,7 +40,7 @@ public class ApiController {
         List<Transaction> recent;
         java.util.Map<String, Double> breakdown;
         if (accountId == null) {
-            recent = dataService.getRecentTransactions(3);
+            recent = dataService.getRecentTransactions(6);
             breakdown = dataService.getExpenseBreakdown();
         } else {
             recent = dataService.getRecentTransactionsForAccount(accountId, 3);

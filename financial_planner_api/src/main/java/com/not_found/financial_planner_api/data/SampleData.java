@@ -2,6 +2,9 @@ package com.not_found.financial_planner_api.data;
 
 import com.not_found.financial_planner_api.model.Account;
 import com.not_found.financial_planner_api.model.Transaction;
+import com.not_found.financial_planner_api.categorization.model.MerchantCategory;
+import com.not_found.financial_planner_api.categorization.model.TransactionPattern;
+import com.not_found.financial_planner_api.categorization.service.TransactionCategorizationService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +12,39 @@ import java.util.List;
 public class SampleData {
     private static final List<Transaction> transactions = new ArrayList<>();
     private static final List<Account> accounts = new ArrayList<>();
+    private static final List<MerchantCategory> merchantCategories = new ArrayList<>();
+
+    // Category Constants (from TransactionCategorizationService)
+    private static final String CATEGORY_GROCERIES = TransactionCategorizationService.CATEGORY_GROCERIES;
+    private static final String CATEGORY_TRANSPORTATION = TransactionCategorizationService.CATEGORY_TRANSPORTATION;
+    private static final String CATEGORY_ENTERTAINMENT = TransactionCategorizationService.CATEGORY_ENTERTAINMENT;
+    @SuppressWarnings("unused")
+    private static final String CATEGORY_OTHER = TransactionCategorizationService.CATEGORY_OTHER;
 
     static {
+        initializeCategories();
         initializeTransactions();
         initializeAccounts();
+    }
+
+    private static void initializeCategories() {
+        // Grocery stores
+        merchantCategories.add(new MerchantCategory("Whole Foods", CATEGORY_GROCERIES,
+                List.of(new TransactionPattern(0, 200, CATEGORY_GROCERIES, 1))));
+        merchantCategories.add(new MerchantCategory("Trader", CATEGORY_GROCERIES,
+                List.of(new TransactionPattern(0, 200, CATEGORY_GROCERIES, 1))));
+        merchantCategories.add(new MerchantCategory("Jewel Osco", CATEGORY_GROCERIES,
+                List.of(new TransactionPattern(0, 200, CATEGORY_GROCERIES, 1))));
+
+        // Transportation
+        merchantCategories.add(new MerchantCategory("Gas", CATEGORY_TRANSPORTATION,
+                List.of(new TransactionPattern(0, 100, CATEGORY_TRANSPORTATION, 1))));
+
+        // Entertainment
+        merchantCategories.add(new MerchantCategory("Netflix", CATEGORY_ENTERTAINMENT,
+                List.of(new TransactionPattern(5, 20, CATEGORY_ENTERTAINMENT, 1))));
+        merchantCategories.add(new MerchantCategory("Coffee", CATEGORY_ENTERTAINMENT,
+                List.of(new TransactionPattern(2, 10, CATEGORY_ENTERTAINMENT, 4))));
     }
 
     private static void initializeTransactions() {
@@ -57,5 +89,9 @@ public class SampleData {
 
     public static List<Account> getAccounts() {
         return new ArrayList<>(accounts);
+    }
+
+    public static List<MerchantCategory> getMerchantCategories() {
+        return new ArrayList<>(merchantCategories);
     }
 }
