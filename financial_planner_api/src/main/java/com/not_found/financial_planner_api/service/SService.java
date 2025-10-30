@@ -12,12 +12,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for the Financial Planner application.
+ * Handles business logic, data operations, and transaction categorization.
+ */
 @Service
 public class SService {
+    /** List of all accounts in the system */
     private List<Account> accounts;
+    
+    /** List of all transactions in the system */
     private List<Transaction> transactions;
+    
+    /** Service for categorizing transactions */
     private final TransactionCategorizationService categorizationService;
 
+    /**
+     * Constructor initializes the categorization service with merchant categories
+     */
     public SService() {
         this.categorizationService = new TransactionCategorizationService(SampleData.getMerchantCategories());
     }
@@ -32,14 +44,91 @@ public class SService {
         return new ArrayList<>(accounts);
     }
 
+    /**
+     * Get all transactions with optional sorting
+     * @param sortBy Sorting criterion: "date", "amount", "description", or "account"
+     * @param order Sort order: "asc" for ascending, "desc" for descending
+     * @return Sorted list of all transactions
+     */
+    public List<Transaction> getTransactions(String sortBy, String order) {
+        List<Transaction> result = new ArrayList<>(transactions);
+        sortTransactions(result, sortBy, order);
+        return result;
+    }
+
+    /**
+     * Get all transactions in default order
+     * @return List of all transactions
+     */
     public List<Transaction> getTransactions() {
-        return new ArrayList<>(transactions);
+        return getTransactions(null, null);
+    }
+
+    /**
+     * Get transactions for a specific account with optional sorting
+     * @param accountId Account ID to filter transactions
+     * @param sortBy Sorting criterion: "date", "amount", "description", or "account"
+     * @param order Sort order: "asc" for ascending, "desc" for descending
+     * @return Sorted list of transactions for the specified account
+     */
+    public List<Transaction> getTransactionsForAccount(long accountId, String sortBy, String order) {
+        List<Transaction> filtered = transactions.stream()
+                .filter(t -> t.getAccountId() == accountId)
+                .collect(Collectors.toList());
+        sortTransactions(filtered, sortBy, order);
+        return filtered;
     }
 
     public List<Transaction> getTransactionsForAccount(long accountId) {
-        return transactions.stream()
-                .filter(t -> t.getAccountId() == accountId)
-                .collect(Collectors.toList());
+        return getTransactionsForAccount(accountId, null, null);
+    }
+
+    /**
+     * Sort a list of transactions based on specified criteria and order
+     * @param txs List of transactions to sort
+     * @param sortBy Sorting criterion: "date", "amount", "description", or "account"
+     * @param order Sort order: "asc" for ascending, "desc" for descending
+     */
+    private void sortTransactions(List<Transaction> txs, String sortBy, String order) {
+        if (sortBy == null) return;
+
+        boolean ascending = order == null || order.equalsIgnoreCase("asc");
+        
+        switch (sortBy.toLowerCase()) {
+            case "date":
+                // Sort by transaction date
+                txs.sort((a, b) -> ascending ? 
+                    a.getDate().compareTo(b.getDate()) :
+                    b.getDate().compareTo(a.getDate()));
+                break;
+            case "amount":
+                // Sort by transaction amount
+                txs.sort((a, b) -> ascending ? 
+                    Double.compare(a.getAmount(), b.getAmount()) :
+                    Double.compare(b.getAmount(), a.getAmount()));
+                break;
+            case "description":
+                // Sort by transaction description alphabetically
+                txs.sort((a, b) -> ascending ?
+                    compareDescriptions(a, b) :
+                    compareDescriptions(b, a));
+                break;
+            case "account":
+                // Sort by account ID
+                txs.sort((a, b) -> ascending ?
+                    Long.compare(a.getAccountId(), b.getAccountId()) :
+                    Long.compare(b.getAccountId(), a.getAccountId()));
+                break;
+            default:
+                // No sorting if invalid sort parameter
+                break;
+        }
+    }
+
+    private int compareDescriptions(Transaction a, Transaction b) {
+        String descA = a.getDescription() == null ? "" : a.getDescription();
+        String descB = b.getDescription() == null ? "" : b.getDescription();
+        return descA.compareToIgnoreCase(descB);
     }
 
     public List<Transaction> getRecentTransactions(int limit) {

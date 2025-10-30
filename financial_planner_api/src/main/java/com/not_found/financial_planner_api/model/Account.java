@@ -3,15 +3,31 @@ package com.not_found.financial_planner_api.model;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Represents a financial account in the system.
+ * Uses Lombok annotations for automatic getter and setter generation.
+ */
 @Getter
 @Setter
 public class Account {
+    /** Unique identifier for the account */
     private long id;
+    
+    /** Name of the account (e.g., "Checking", "Savings") */
     private String name;
+    
+    /** Current balance of the account */
     private double balance;
 
+    /** Default constructor for JPA and JSON serialization */
     public Account() {}
 
+    /**
+     * Constructor for creating a new account
+     * @param id Unique identifier for the account
+     * @param name Name of the account (e.g., "Checking", "Savings")
+     * @param balance Initial balance of the account
+     */
     public Account(long id, String name, double balance) {
         this.id = id;
         this.name = name;

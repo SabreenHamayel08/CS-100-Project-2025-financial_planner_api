@@ -4,17 +4,39 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Represents a financial transaction in the system.
+ * Uses Lombok annotations for automatic getter and setter generation.
+ */
 @Getter
 @Setter
 public class Transaction {
+    /** Unique identifier for the transaction */
     private long id;
+    
+    /** ID of the account this transaction belongs to */
     private long accountId;
+    
+    /** Date when the transaction occurred */
     private LocalDate date;
+    
+    /** Description or merchant name for the transaction */
     private String description;
+    
+    /** Transaction amount (positive for credits, negative for debits) */
     private double amount;
 
+    /** Default constructor for JPA and JSON serialization */
     public Transaction() {}
 
+    /**
+     * Constructor for creating a new transaction
+     * @param id Unique identifier for the transaction
+     * @param accountId ID of the account this transaction belongs to
+     * @param date Date when the transaction occurred
+     * @param description Description or merchant name
+     * @param amount Transaction amount (positive for credits, negative for debits)
+     */
     public Transaction(long id, long accountId, LocalDate date, String description, double amount) {
         this.id = id;
         this.accountId = accountId;
