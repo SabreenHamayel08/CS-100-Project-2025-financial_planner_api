@@ -129,6 +129,29 @@ public class ApiController {
         return dataService.getTransactions("account", "desc");
     }
 
+    /**
+     * Search transactions by description or date
+     * @param query Search query for description (case-insensitive)
+     * @param startDate Optional start date (format: YYYY-MM-DD)
+     * @param endDate Optional end date (format: YYYY-MM-DD)
+     * @param accountId Optional account ID to filter transactions
+     * @return List of matching transactions
+     * Search by description: GET /api/transactions/search?query=coffee
+     * Search by date range: GET /api/transactions/search?startDate=2025-01-01&endDate=2025-12-31
+     * Search by description within date range: GET /api/transactions/search?query=grocery&startDate=2025-01-01&endDate=2025-12-31
+     * Search in specific account: GET /api/transactions/search?query=coffee&accountId=1
+     * Search by date range in specific account: GET /api/transactions/search?startDate=2025-01-01&endDate=2025-12-31&accountId=1
+     */
+    @GetMapping("/transactions/search")
+    public List<Transaction> searchTransactions(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String query,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String startDate,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String endDate,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Long accountId
+    ) {
+        return dataService.searchTransactions(query, startDate, endDate, accountId);
+    }
+
     @GetMapping("/dashboard")
     public com.not_found.financial_planner_api.model.DashboardResponse getDashboard(@org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId) {
         List<Transaction> recent;

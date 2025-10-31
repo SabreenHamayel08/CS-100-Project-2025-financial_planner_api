@@ -7,6 +7,8 @@ import com.not_found.financial_planner_api.categorization.service.TransactionCat
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +155,49 @@ public class SService {
     public Map<String, Double> getExpenseBreakdownForAccount(long accountId) {
         List<Transaction> tx = getTransactionsForAccount(accountId);
         return categorize(tx);
+    }
+
+    /**
+     * Search transactions by description or date range
+     * @param query Search query for description (case-insensitive)
+     * @param startDate Optional start date in YYYY-MM-DD format
+     * @param endDate Optional end date in YYYY-MM-DD format
+     * @param accountId Optional account ID to filter transactions
+     * @return List of matching transactions
+     */
+    public List<Transaction> searchTransactions(String query, String startDate, String endDate, Long accountId) {
+        List<Transaction> result = new ArrayList<>(transactions);
+
+        // Filter by account if specified
+        if (accountId != null) {
+            result = result.stream()
+                    .filter(t -> t.getAccountId() == accountId)
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by description if query is provided
+        if (query != null && !query.trim().isEmpty()) {
+            String searchQuery = query.trim().toLowerCase();
+            result = result.stream()
+                    .filter(t -> t.getDescription() != null && 
+                               t.getDescription().toLowerCase().contains(searchQuery))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by date range if provided
+        if (startDate != null || endDate != null) {
+            LocalDate start = startDate != null ? LocalDate.parse(startDate) : LocalDate.MIN;
+            LocalDate end = endDate != null ? LocalDate.parse(endDate) : LocalDate.MAX;
+
+            result = result.stream()
+                    .filter(t -> !t.getDate().isBefore(start) && !t.getDate().isAfter(end))
+                    .collect(Collectors.toList());
+        }
+
+        // Sort results by date (newest first) by default
+        result.sort((a, b) -> b.getDate().compareTo(a.getDate()));
+        
+        return result;
     }
 
     private Map<String, Double> categorize(List<Transaction> txs) {
