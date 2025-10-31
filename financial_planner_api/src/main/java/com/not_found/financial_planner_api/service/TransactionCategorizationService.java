@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.not_found.financial_planner_api.data.SampleData;
 import com.not_found.financial_planner_api.model.MerchantCategory;
 import com.not_found.financial_planner_api.model.Transaction;
 
@@ -40,7 +41,7 @@ public class TransactionCategorizationService {
 
         for (Transaction tx : transactions) {
             
-            // if (tx.getAmount() >= 0) continue; // Skip income transactions
+            if (tx.getAmount() >= 0) continue; // Skip income transactions
             
             double amount = Math.abs(tx.getAmount());
             String category = CATEGORY_OTHER;
@@ -68,14 +69,22 @@ public class TransactionCategorizationService {
     }
 
     private String classifyByAmount(double amount) {
-        if (amount < 20.0) {
-            return CATEGORY_GROCERIES; // Small purchases likely groceries
-        } else if (amount >= 1000.0) {
-            return CATEGORY_HOUSING; // Large amounts likely housing/utilities
-        } else if (amount >= 100.0 && amount < 1000.0) {
-            return CATEGORY_SHOPPING; // Medium amounts likely shopping
+        List<Transaction> transactions = SampleData.getTransactionDescription();
+        for(Transaction tx : transactions){
+            if (tx.getCategory() == "Gas"){
+                return CATEGORY_TRANSPORTATION; // Gas purchases
+            } else if (amount < 20.0) {
+                return CATEGORY_GROCERIES; // Small purchases likely groceries
+            } else if (amount >= 1000.0) {
+                return CATEGORY_HOUSING; // Large amounts likely housing/utilities
+            } else if (amount >= 100.0 && amount < 1000.0) {
+                return CATEGORY_SHOPPING; // Medium amounts likely shopping
+            } else if (amount >= 50.0 && amount < 100.0) {
+                return CATEGORY_ENTERTAINMENT; // Moderate amounts likely entertainment
+            } else if (amount >= 20.0 && amount < 50.0) {
+                return CATEGORY_TRANSPORTATION; // Smaller amounts likely transportation
+            }
         }
         return CATEGORY_OTHER;
     }
-    
 }
