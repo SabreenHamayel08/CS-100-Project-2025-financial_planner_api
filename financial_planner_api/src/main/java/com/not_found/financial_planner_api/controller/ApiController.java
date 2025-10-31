@@ -161,14 +161,30 @@ public class ApiController {
     public com.not_found.financial_planner_api.model.DashboardResponse getDashboard(@org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId) {
         List<Transaction> recent;
         java.util.Map<String, Double> breakdown;
+        RewardsAnalysis.CardRecommendation bestCard;
+        
         if (accountId == null) {
             recent = dataService.getRecentTransactions(6);
             breakdown = dataService.getExpenseBreakdown();
+            // Get all transactions for rewards analysis
+            List<Transaction> allTransactions = dataService.getTransactions();
+            bestCard = rewardsService.analyzeRewards(allTransactions)
+                .getRecommendedCards()
+                .stream()
+                .findFirst()
+                .orElse(null);
         } else {
             recent = dataService.getRecentTransactionsForAccount(accountId, 6);
             breakdown = dataService.getExpenseBreakdownForAccount(accountId);
+            // Get account transactions for rewards analysis
+            List<Transaction> accountTransactions = dataService.getTransactionsForAccount(accountId);
+            bestCard = rewardsService.analyzeRewards(accountTransactions)
+                .getRecommendedCards()
+                .stream()
+                .findFirst()
+                .orElse(null);
         }
-        return new com.not_found.financial_planner_api.model.DashboardResponse(recent, breakdown);
+        return new com.not_found.financial_planner_api.model.DashboardResponse(recent, breakdown, bestCard);
     }
 
     @GetMapping("/data")
@@ -224,5 +240,29 @@ public class ApiController {
             dataService.getTransactionsForAccount(accountId);
         
         return rewardsService.analyzeRewards(transactions);
+    }
+
+    /**
+     * Get the best card recommendation based on spending patterns up to a specific date
+     * 
+     * @param date The date up to which to analyze transactions (format: YYYY-MM-DD)
+     * @return CardRecommendation for the most beneficial rewards card
+     */
+    @GetMapping("/bestCardRecommendation/{date}")
+    public RewardsAnalysis.CardRecommendation getBestCardRecommendation(
+            @PathVariable("date") String date,
+            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId
+    ) {
+        List<Transaction> transactions = (accountId == null) ? 
+            dataService.searchTransactions(null, null, date, accountId) : 
+            dataService.searchTransactions(null, null, date, accountId);
+
+        // Get full rewards analysis
+        RewardsAnalysis analysis = rewardsService.analyzeRewards(transactions);
+        
+        // Return the top recommendation (first in the sorted list)
+        List<RewardsAnalysis.CardRecommendation> recommendations = analysis.getRecommendedCards();
+        return recommendations != null && !recommendations.isEmpty() ? 
+            recommendations.get(0) : null;
     }
 }
