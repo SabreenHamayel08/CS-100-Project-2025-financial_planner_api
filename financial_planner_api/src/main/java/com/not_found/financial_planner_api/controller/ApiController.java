@@ -2,7 +2,9 @@ package com.not_found.financial_planner_api.controller;
 
 import com.not_found.financial_planner_api.model.Account;
 import com.not_found.financial_planner_api.model.Transaction;
+import com.not_found.financial_planner_api.model.RewardsAnalysis;
 import com.not_found.financial_planner_api.service.SService;
+import com.not_found.financial_planner_api.service.RewardsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +23,16 @@ public class ApiController {
 
     /** Service layer for handling business logic and data operations */
     private final SService dataService;
+    private final RewardsService rewardsService;
 
     /**
-     * Constructor for dependency injection of the service layer
-     * @param dataService The service layer instance
+     * Constructor for dependency injection of the service layers
+     * @param dataService The service layer instance for data operations
+     * @param rewardsService The service layer instance for rewards analysis
      */
-    public ApiController(SService dataService) {
+    public ApiController(SService dataService, RewardsService rewardsService) {
         this.dataService = dataService;
+        this.rewardsService = rewardsService;
     }
 
     /**
@@ -160,7 +165,7 @@ public class ApiController {
             recent = dataService.getRecentTransactions(6);
             breakdown = dataService.getExpenseBreakdown();
         } else {
-            recent = dataService.getRecentTransactionsForAccount(accountId, 3);
+            recent = dataService.getRecentTransactionsForAccount(accountId, 6);
             breakdown = dataService.getExpenseBreakdownForAccount(accountId);
         }
         return new com.not_found.financial_planner_api.model.DashboardResponse(recent, breakdown);
@@ -201,5 +206,23 @@ public class ApiController {
         }
 
         return new com.not_found.financial_planner_api.model.AllDataResponse(accounts, transactions, dashboard);
+    }
+
+    /**
+     * Get rewards analysis for transactions. Can be filtered by account ID.
+     * Analyzes spending patterns and provides recommendations for reward cards.
+     * 
+     * @param accountId Optional account ID to analyze rewards for specific account
+     * @return RewardsAnalysis containing spending analysis and card recommendations
+     */
+    @GetMapping("/rewards")
+    public RewardsAnalysis getRewardsAnalysis(
+            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId
+    ) {
+        List<Transaction> transactions = (accountId == null) ? 
+            dataService.getTransactions() : 
+            dataService.getTransactionsForAccount(accountId);
+        
+        return rewardsService.analyzeRewards(transactions);
     }
 }
