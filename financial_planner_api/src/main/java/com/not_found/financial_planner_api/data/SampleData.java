@@ -1,10 +1,11 @@
 package com.not_found.financial_planner_api.data;
 
 import com.not_found.financial_planner_api.model.Account;
+import com.not_found.financial_planner_api.model.MerchantCategory;
 import com.not_found.financial_planner_api.model.Transaction;
-import com.not_found.financial_planner_api.categorization.model.MerchantCategory;
-import com.not_found.financial_planner_api.categorization.model.TransactionPattern;
-import com.not_found.financial_planner_api.categorization.service.TransactionCategorizationService;
+import com.not_found.financial_planner_api.model.TransactionPattern;
+import com.not_found.financial_planner_api.service.TransactionCategorizationService;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,8 @@ public class SampleData {
                 List.of(new TransactionPattern(0, 200, CATEGORY_GROCERIES, 1))));
         merchantCategories.add(new MerchantCategory("Jewel Osco", CATEGORY_GROCERIES,
                 List.of(new TransactionPattern(0, 200, CATEGORY_GROCERIES, 1))));
+        merchantCategories.add(new MerchantCategory("Coffee", CATEGORY_GROCERIES,
+                List.of(new TransactionPattern(2, 10, CATEGORY_GROCERIES, 4))));
 
         // Transportation
         merchantCategories.add(new MerchantCategory("Gas", CATEGORY_TRANSPORTATION,
@@ -43,8 +46,6 @@ public class SampleData {
         // Entertainment
         merchantCategories.add(new MerchantCategory("Netflix", CATEGORY_ENTERTAINMENT,
                 List.of(new TransactionPattern(5, 20, CATEGORY_ENTERTAINMENT, 1))));
-        merchantCategories.add(new MerchantCategory("Coffee", CATEGORY_ENTERTAINMENT,
-                List.of(new TransactionPattern(2, 10, CATEGORY_ENTERTAINMENT, 4))));
     }
 
     private static void initializeTransactions() {
@@ -94,4 +95,6 @@ public class SampleData {
     public static List<MerchantCategory> getMerchantCategories() {
         return new ArrayList<>(merchantCategories);
     }
+
+
 }

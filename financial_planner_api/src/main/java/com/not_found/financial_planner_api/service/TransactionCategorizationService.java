@@ -1,10 +1,13 @@
-package com.not_found.financial_planner_api.categorization.service;
+package com.not_found.financial_planner_api.service;
 
-import com.not_found.financial_planner_api.categorization.model.MerchantCategory;
-import com.not_found.financial_planner_api.model.Transaction;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.stereotype.Service;
+
+import com.not_found.financial_planner_api.model.MerchantCategory;
+import com.not_found.financial_planner_api.model.Transaction;
+
 
 @Service
 public class TransactionCategorizationService {
@@ -36,7 +39,8 @@ public class TransactionCategorizationService {
         categories.put(CATEGORY_OTHER, 0.0);
 
         for (Transaction tx : transactions) {
-            if (tx.getAmount() >= 0) continue; // Skip income transactions
+            
+            // if (tx.getAmount() >= 0) continue; // Skip income transactions
             
             double amount = Math.abs(tx.getAmount());
             String category = CATEGORY_OTHER;
@@ -53,8 +57,11 @@ public class TransactionCategorizationService {
             if (category.equals(CATEGORY_OTHER)) {
                 category = classifyByAmount(amount);
             }
-
-            categories.put(category, categories.getOrDefault(category, 0.0) + amount);
+            tx.setCategory(category);
+            
+            categories.put(category, categories.getOrDefault(category, 0.0
+            ) + amount);
+            
         }
 
         return categories;
@@ -70,4 +77,5 @@ public class TransactionCategorizationService {
         }
         return CATEGORY_OTHER;
     }
+    
 }

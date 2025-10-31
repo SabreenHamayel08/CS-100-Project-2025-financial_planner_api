@@ -4,13 +4,20 @@ import com.not_found.financial_planner_api.model.Account;
 import com.not_found.financial_planner_api.model.Transaction;
 import com.not_found.financial_planner_api.model.RewardsAnalysis;
 import com.not_found.financial_planner_api.service.SService;
+import com.not_found.financial_planner_api.service.TransactionCategorizationService;
 import com.not_found.financial_planner_api.service.RewardsService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.not_found.financial_planner_api.model.MonthlySpending;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.*;
 
 /**
  * REST API Controller for the Financial Planner application.
@@ -156,15 +163,19 @@ public class ApiController {
     ) {
         return dataService.searchTransactions(query, startDate, endDate, accountId);
     }
-
+    
+    @Autowired
+    private TransactionCategorizationService TransactionCategorizationService;
     @GetMapping("/dashboard")
     public com.not_found.financial_planner_api.model.DashboardResponse getDashboard(@org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId) {
         List<Transaction> recent;
         java.util.Map<String, Double> breakdown;
         RewardsAnalysis.CardRecommendation bestCard;
+        List<MonthlySpending> monthlySpending = new ArrayList<>();
         
         if (accountId == null) {
             recent = dataService.getRecentTransactions(6);
+            TransactionCategorizationService.categorizeTransactions(recent);
             breakdown = dataService.getExpenseBreakdown();
             // Get all transactions for rewards analysis
             List<Transaction> allTransactions = dataService.getTransactions();
@@ -173,8 +184,12 @@ public class ApiController {
                 .stream()
                 .findFirst()
                 .orElse(null);
+                
+            // Get monthly spending for last 12 months
+            monthlySpending = getLastTwelveMonthsSpending(accountId);
         } else {
             recent = dataService.getRecentTransactionsForAccount(accountId, 6);
+            TransactionCategorizationService.categorizeTransactions(recent);
             breakdown = dataService.getExpenseBreakdownForAccount(accountId);
             // Get account transactions for rewards analysis
             List<Transaction> accountTransactions = dataService.getTransactionsForAccount(accountId);
@@ -183,8 +198,62 @@ public class ApiController {
                 .stream()
                 .findFirst()
                 .orElse(null);
+                
+            // Get monthly spending for last 12 months for this account
+            monthlySpending = getLastTwelveMonthsSpending(accountId);
         }
-        return new com.not_found.financial_planner_api.model.DashboardResponse(recent, breakdown, bestCard);
+        return new com.not_found.financial_planner_api.model.DashboardResponse(recent, breakdown, bestCard, monthlySpending);
+    }
+    
+    /**
+     * Helper method to get spending aggregation for the last 12 months
+     */
+    private List<MonthlySpending> getLastTwelveMonthsSpending(Long accountId) {
+        List<MonthlySpending> result = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+        
+        // Get last 6 months
+        for (int i = 0; i < 12; i++) {
+            YearMonth month = YearMonth.from(now.minusMonths(i));
+            String monthStr = month.toString(); // YYYY-MM format
+            
+            // Get transactions for this month
+            List<Transaction> transactions = dataService.searchTransactions(
+                null, 
+                month.atDay(1).toString(),
+                month.atEndOfMonth().toString(),
+                accountId
+            );
+            
+            // Calculate totals
+            double totalSpent = transactions.stream()
+                .filter(t -> t.getAmount() < 0)
+                .mapToDouble(t -> Math.abs(t.getAmount()))
+                .sum();
+                
+            // Get spending breakdown by category
+            Map<String, Double> categoryBreakdown = new HashMap<>();
+            transactions.stream()
+                .filter(t -> t.getAmount() < 0)
+                .forEach(t -> {
+                    String category = t.getCategory();
+                    if (category == null || category.isEmpty()) {
+                        category = rewardsService.determineCategory(t);
+                    }
+                    categoryBreakdown.merge(category, Math.abs(t.getAmount()), Double::sum);
+                });
+            
+            // Create monthly spending summary
+            MonthlySpending monthSpending = new MonthlySpending(
+                monthStr,
+                totalSpent,
+                transactions.size()
+            );
+            
+            result.add(monthSpending);
+        }
+        
+        return result;
     }
 
     @GetMapping("/data")
@@ -264,5 +333,65 @@ public class ApiController {
         List<RewardsAnalysis.CardRecommendation> recommendations = analysis.getRecommendedCards();
         return recommendations != null && !recommendations.isEmpty() ? 
             recommendations.get(0) : null;
+    }
+
+    /**
+     * Get monthly aggregated spending across all registered cards
+     * 
+     * @param month Month in YYYY-MM format (e.g., 2025-10)
+     * @return Map of account details to spending summaries
+     */
+    @GetMapping("/spending/{month}")
+    public Map<String, Map<String, Object>> getMonthlySpending(@PathVariable("month") String month) {
+        // Validate month format
+        if (!month.matches("\\d{4}-\\d{2}")) {
+            throw new IllegalArgumentException("Month must be in YYYY-MM format");
+        }
+        
+        // Get all accounts
+        List<Account> accounts = dataService.getAccounts();
+        Map<String, Map<String, Object>> result = new HashMap<>();
+        
+        // Process each account
+        for (Account account : accounts) {
+            String startDate = month + "-01";
+            String endDate = month + "-31"; // This works for our purpose since invalid dates will be handled by the search
+            
+            // Get transactions for this account in the specified month
+            List<Transaction> transactions = dataService.searchTransactions(
+                null, startDate, endDate, account.getId());
+            
+            // Calculate spending metrics
+            double totalSpent = transactions.stream()
+                .filter(t -> t.getAmount() < 0) // Only include expenses (negative amounts)
+                .mapToDouble(t -> Math.abs(t.getAmount()))
+                .sum();
+                
+            // Get spending breakdown by category
+            Map<String, Double> categoryBreakdown = new HashMap<>();
+            transactions.stream()
+                .filter(t -> t.getAmount() < 0)
+                .forEach(t -> {
+                    String category = t.getCategory();
+                    if (category == null || category.isEmpty()) {
+                        // Try to determine category from description
+                        category = rewardsService.determineCategory(t);
+                    }
+                    categoryBreakdown.merge(category, Math.abs(t.getAmount()), Double::sum);
+                });
+            
+            
+            // Create summary for this account
+            Map<String, Object> accountSummary = new HashMap<>();
+            accountSummary.put("accountName", account.getName());
+            accountSummary.put("totalSpent", totalSpent);
+            accountSummary.put("transactionCount", transactions.size());
+        
+            
+            // Add to result
+            result.put(String.valueOf(account.getId()), accountSummary);
+        }
+        
+        return result;
     }
 }

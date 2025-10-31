@@ -3,7 +3,7 @@ package com.not_found.financial_planner_api.service;
 import com.not_found.financial_planner_api.data.SampleData;
 import com.not_found.financial_planner_api.model.Account;
 import com.not_found.financial_planner_api.model.Transaction;
-import com.not_found.financial_planner_api.categorization.service.TransactionCategorizationService;
+
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;

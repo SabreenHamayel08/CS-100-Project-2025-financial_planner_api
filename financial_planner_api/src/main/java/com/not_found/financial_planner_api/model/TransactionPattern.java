@@ -1,6 +1,5 @@
-package com.not_found.financial_planner_api.categorization.model;
+package com.not_found.financial_planner_api.model;
 
-import com.not_found.financial_planner_api.model.Transaction;
 import java.util.List;
 import lombok.Getter;
 

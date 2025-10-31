@@ -199,16 +199,25 @@ public class RewardsService {
         return recommendations;
     }
 
-    private String determineCategory(Transaction tx) {
-        String desc = tx.getDescription().toLowerCase();
-        if (desc.contains("grocery") || desc.contains("food")) return "groceries";
-        if (desc.contains("gas")) return "gas";
-        if (desc.contains("netflix") || desc.contains("spotify")) return "streaming";
-        if (desc.contains("uber") || desc.contains("lyft")) return "transit";
-        if (desc.contains("restaurant") || desc.contains("cafe")) return "dining";
-        if (desc.contains("hotel") || desc.contains("airline")) return "travel";
+    public String determineCategory(Transaction transaction) {
+        // Simple heuristic based on description keywords
+        String desc = transaction.getDescription().toLowerCase();
+        if (desc.contains("grocery") || desc.contains("supermarket") || desc.contains("coffee")) {
+            return "groceries";
+        } else if (desc.contains("restaurant") || desc.contains("dining") || desc.contains("cafe")) {
+            return "dining";
+        } else if (desc.contains("uber") || desc.contains("lyft") || desc.contains("taxi") || desc.contains("transit")) {
+            return "transportation";
+        } else if (desc.contains("flight") || desc.contains("hotel") || desc.contains("travel")) {
+            return "travel";
+        } else if (desc.contains("netflix") || desc.contains("spotify") || desc.contains("streaming")) {
+            return "streaming";
+        } else if (desc.contains("gas") || desc.contains("fuel")) {
+            return "gas";
+        }
         return "other";
     }
+        
 
     private double calculatePoints(double amount, String category) {
         // Simple example - can be made more sophisticated
@@ -236,6 +245,7 @@ public class RewardsService {
                 .sum();
     }
 
+    
     private Map<String, Double> calculateRewardsByCategory(List<Transaction> transactions, 
             RewardCard card) {
         Map<String, Double> rewards = new HashMap<>();

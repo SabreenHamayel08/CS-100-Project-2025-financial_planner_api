@@ -1,7 +1,7 @@
-package com.not_found.financial_planner_api.categorization.model;
+package com.not_found.financial_planner_api.model;
 
-import com.not_found.financial_planner_api.model.Transaction;
 import java.util.List;
+
 import lombok.Getter;
 
 @Getter
@@ -25,8 +25,9 @@ public class MerchantCategory {
         if (patterns == null || patterns.isEmpty()) {
             return true;
         }
+        return false;
 
         // Check if any pattern matches
-        return patterns.stream().anyMatch(p -> p.matches(tx, history));
+        // return patterns.stream().anyMatch(p -> p.matches(tx, history));
     }
 }
