@@ -69,7 +69,7 @@ public class TransactionCategorizationService {
     }
 
     private String classifyByAmount(double amount) {
-        List<Transaction> transactions = SampleData.getTransactionDescription();
+        List<Transaction> transactions = SampleData.getTransactions();
         for(Transaction tx : transactions){
             if (tx.getCategory() == "Gas"){
                 return CATEGORY_TRANSPORTATION; // Gas purchases

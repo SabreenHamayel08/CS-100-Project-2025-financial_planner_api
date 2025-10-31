@@ -96,9 +96,5 @@ public class SampleData {
         return new ArrayList<>(merchantCategories);
     }
 
-    public static List<Transaction> getTransactionDescription() {
-        return transactions;
-    }
-
 
 }
