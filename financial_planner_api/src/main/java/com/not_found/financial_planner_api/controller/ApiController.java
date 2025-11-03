@@ -50,6 +50,44 @@ public class ApiController {
     public List<Account> getAccounts() {
         return dataService.getAccounts();
     }
+    /*
+     * Subscription API - Subscription plan 
+       - if they have the basic plan, dashboard only shows expense categorization
+       and last 6 transactions and also monthly spending summary for free users
+        - Premium plan users get to see future trends graph analysis, create budget goals, 
+        and see best card recommendation based on their spending patterns
+     */
+    @GetMapping("/accounts/subscription/{plan}")
+    public List<Account> getAccountsBySubscriptionPlan(@PathVariable("plan") String plan){
+        List<Account> allAccounts = dataService.getAccounts();
+        List<Account> filteredAccounts = new ArrayList<>();
+        for (Account account : allAccounts) {
+            if (account.getSubscriptionPlan().equalsIgnoreCase(plan)) {
+                filteredAccounts.add(account);
+            }
+        }
+        return filteredAccounts;
+    }
+           
+
+     /*
+      * Customer info -customer is either a free member account
+        or a premium user account 
+        Also inscludes their Name, Age, date joined, account cards,
+        balance, etc.
+      */
+    @GetMapping("/accounts/customerinfo/{name}")
+    public List<Account> getAccountsByCustomerName(@PathVariable("name") String name){
+        List<Account> allAccounts = dataService.getAccounts();
+        List<Account> filteredAccounts = new ArrayList<>();
+        for (Account account : allAccounts) {
+            if (account.getCustomerName().equalsIgnoreCase(name)) {
+                filteredAccounts.add(account);
+            }
+        }
+
+        return filteredAccounts;
+    }
 
     /**
      * Get all transactions for a specific account
@@ -383,7 +421,7 @@ public class ApiController {
             
             // Create summary for this account
             Map<String, Object> accountSummary = new HashMap<>();
-            accountSummary.put("accountName", account.getName());
+            accountSummary.put("accountName", account.getAccountName());
             accountSummary.put("totalSpent", totalSpent);
             accountSummary.put("transactionCount", transactions.size());
         

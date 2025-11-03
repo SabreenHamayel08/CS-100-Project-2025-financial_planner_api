@@ -48,6 +48,7 @@ public class SampleData {
                 List.of(new TransactionPattern(5, 20, CATEGORY_ENTERTAINMENT, 1))));
     }
 
+    //intializes transactions for specific for each account (ac1, ac2, ac3, etc.)
     private static void initializeTransactions() {
         transactions.add(new Transaction(1, 1, LocalDate.now().minusDays(1), "Whole Foods", -72.50));
         transactions.add(new Transaction(2, 1, LocalDate.now().minusDays(2), "REMOTE ONLINE DEPOSIT #1", 1500.00));
@@ -68,20 +69,34 @@ public class SampleData {
         transactions.add(new Transaction(17, 3, LocalDate.now().minusDays(80), "Jewel Osco", -7.99));
         transactions.add(new Transaction(18, 2, LocalDate.now().minusDays(86), "CASH DEPOSIT ATM", 3500.00));
     }
-
+    // initializes accounts for a specific customer that is a basic user and a premium user
     private static void initializeAccounts() {
+        // Basic User Accounts  
         accounts.add(new Account(1, "Checking", transactions.stream()
                 .filter(t -> t.getAccountId() == 1)
                 .mapToDouble(Transaction::getAmount)
-                .sum()));
+                .sum(), "John Doe", false, "10-03-2024", 22, "M", "842-935-9807", "john.doe@gmail.com", "07-08-2003"));
         accounts.add(new Account(2, "Savings", transactions.stream()
                 .filter(t -> t.getAccountId() == 2)
                 .mapToDouble(Transaction::getAmount)
-                .sum()));
+                .sum(), "John Doe", false, "10-03-2024", 22, "M", "842-935-9807", "john.doe@gmail.com", "07-08-2003"));
         accounts.add(new Account(3, "Credit Card", transactions.stream()
                 .filter(t -> t.getAccountId() == 3)
                 .mapToDouble(Transaction::getAmount)
-                .sum() + 5000)); // Assuming a credit limit of 5000
+                .sum() + 5000, "John Doe", false, "10-03-2024", 22, "M", "842-935-9807", "john.doe@gmail.com", "07-08-2003")); // Assuming a credit limit of 5000
+        // Premium User Accounts
+        accounts.add(new Account(1, "Checking", transactions.stream()
+                .filter(t -> t.getAccountId() == 4)
+                .mapToDouble(Transaction::getAmount)
+                .sum(), "Alice Smith", true, "09-17-2023", 31, "F", "777-432-2981", "asmith94@yahoo.com", "02-14-1994"));
+        accounts.add(new Account(2, "Savings", transactions.stream()
+                .filter(t -> t.getAccountId() == 5)
+                .mapToDouble(Transaction::getAmount)
+                .sum(), "Alice Smith", true, "09-17-2023", 31, "F", "777-432-2981", "asmith94@yahoo.com", "02-14-1994"));
+        accounts.add(new Account(3, "Credit Card", transactions.stream()
+                .filter(t -> t.getAccountId() == 6)
+                .mapToDouble(Transaction::getAmount)
+                .sum() + 10000, "Alice Smith", true, "09-17-2023", 31, "F", "777-432-2981", "asmith94@yahoo.com", "02-14-1994")); // Assuming a credit limit of 10000          
     }
 
     public static List<Transaction> getTransactions() {
