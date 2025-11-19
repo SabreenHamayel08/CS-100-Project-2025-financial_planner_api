@@ -8,6 +8,7 @@ import com.not_found.financial_planner_api.service.TransactionCategorizationServ
 import com.not_found.financial_planner_api.service.RewardsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,7 @@ import java.util.*;
  * Includes various sorting options for transaction data.
  */
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api")
 public class ApiController {
 
@@ -46,6 +48,7 @@ public class ApiController {
      * Get all accounts in the system
      * @return List of all accounts
      */
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts")
     public List<Account> getAccounts() {
         return dataService.getAccounts();
@@ -57,6 +60,7 @@ public class ApiController {
         - Premium plan users get to see future trends graph analysis, create budget goals, 
         and see best card recommendation based on their spending patterns
      */
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/subscription/{plan}")
     public List<Account> getAccountsBySubscriptionPlan(@PathVariable("plan") String plan){
         List<Account> allAccounts = dataService.getAccounts();
@@ -76,6 +80,7 @@ public class ApiController {
         Also inscludes their Name, Age, date joined, account cards,
         balance, etc.
       */
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/customerinfo/{name}")
     public List<Account> getAccountsByCustomerName(@PathVariable("name") String name){
         List<Account> allAccounts = dataService.getAccounts();
@@ -94,6 +99,7 @@ public class ApiController {
      * @param id Account ID
      * @return List of transactions for the specified account
      */
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions")
     public List<Transaction> getTransactionsForAccount(@PathVariable("id") long id) {
         return dataService.getTransactionsForAccount(id);
@@ -104,76 +110,78 @@ public class ApiController {
      * @param id Account ID
      * @return List of sorted transactions
      */
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-date/asc")
     public List<Transaction> getAccountTransactionsByDateAsc(@PathVariable("id") long id) {
         return dataService.getTransactionsForAccount(id, "date", "asc");
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-date/desc")
     public List<Transaction> getAccountTransactionsByDateDesc(@PathVariable("id") long id) {
         return dataService.getTransactionsForAccount(id, "date", "desc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-amount/asc")
     public List<Transaction> getAccountTransactionsByAmountAsc(@PathVariable("id") long id) {
         return dataService.getTransactionsForAccount(id, "amount", "asc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-amount/desc")
     public List<Transaction> getAccountTransactionsByAmountDesc(@PathVariable("id") long id) {
         return dataService.getTransactionsForAccount(id, "amount", "desc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-description/asc")
     public List<Transaction> getAccountTransactionsByDescriptionAsc(@PathVariable("id") long id) {
         return dataService.getTransactionsForAccount(id, "description", "asc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-description/desc")
     public List<Transaction> getAccountTransactionsByDescriptionDesc(@PathVariable("id") long id) {
         return dataService.getTransactionsForAccount(id, "description", "desc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions")
     public List<Transaction> getTransactions() {
         return dataService.getTransactions();
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/by-date/asc")
     public List<Transaction> getTransactionsByDateAsc() {
         return dataService.getTransactions("date", "asc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/by-date/desc")
     public List<Transaction> getTransactionsByDateDesc() {
         return dataService.getTransactions("date", "desc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/by-amount/asc")
     public List<Transaction> getTransactionsByAmountAsc() {
         return dataService.getTransactions("amount", "asc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/by-amount/desc")
     public List<Transaction> getTransactionsByAmountDesc() {
         return dataService.getTransactions("amount", "desc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/by-description/asc")
     public List<Transaction> getTransactionsByDescriptionAsc() {
         return dataService.getTransactions("description", "asc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/by-description/desc")
     public List<Transaction> getTransactionsByDescriptionDesc() {
         return dataService.getTransactions("description", "desc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/by-account/asc")
     public List<Transaction> getTransactionsByAccountAsc() {
         return dataService.getTransactions("account", "asc");
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/by-account/desc")
     public List<Transaction> getTransactionsByAccountDesc() {
         return dataService.getTransactions("account", "desc");
@@ -192,6 +200,7 @@ public class ApiController {
      * Search in specific account: GET /api/transactions/search?query=coffee&accountId=1
      * Search by date range in specific account: GET /api/transactions/search?startDate=2025-01-01&endDate=2025-12-31&accountId=1
      */
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/transactions/search")
     public List<Transaction> searchTransactions(
             @org.springframework.web.bind.annotation.RequestParam(required = false) String query,
@@ -204,6 +213,7 @@ public class ApiController {
     
     @Autowired
     private TransactionCategorizationService TransactionCategorizationService;
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/dashboard")
     public com.not_found.financial_planner_api.model.DashboardResponse getDashboard(@org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId) {
         List<Transaction> recent;
@@ -294,10 +304,10 @@ public class ApiController {
         
         return result;
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/data")
     public com.not_found.financial_planner_api.model.AllDataResponse getAllData(
-            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId,
+            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) String accountId,
             @org.springframework.web.bind.annotation.RequestParam(value = "include", required = false) String include
     ) {
         // parse include param (comma-separated). If absent or empty => include all sections
@@ -312,6 +322,7 @@ public class ApiController {
                 inc.add(p.trim().toLowerCase());
             }
         }
+        accountId = "acc-001";
 
         List<Account> accounts = null;
         List<Transaction> transactions = null;
@@ -339,6 +350,7 @@ public class ApiController {
      * @param accountId Optional account ID to analyze rewards for specific account
      * @return RewardsAnalysis containing spending analysis and card recommendations
      */
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/rewards")
     public RewardsAnalysis getRewardsAnalysis(
             @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId
@@ -356,6 +368,7 @@ public class ApiController {
      * @param date The date up to which to analyze transactions (format: YYYY-MM-DD)
      * @return CardRecommendation for the most beneficial rewards card
      */
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/bestCardRecommendation/{date}")
     public RewardsAnalysis.CardRecommendation getBestCardRecommendation(
             @PathVariable("date") String date,

@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 public class Transaction {
     /** Unique identifier for the transaction */
-    private long id;
+    private String id;
     
     /** ID of the account this transaction belongs to */
     private String accountId;
@@ -55,7 +55,9 @@ public class Transaction {
      * @param amount Transaction amount (positive for credits, negative for debits)
      * @param category Category of the transaction
      */
-    public Transaction(long id, String accountId, LocalDate date, String description, double amount, String category) {
+    public Transaction() {}
+    
+    public Transaction(String id, String accountId, LocalDate date, String description, double amount, String category) {
         this.id = id;
         this.accountId = accountId;
         this.date = date;
@@ -64,7 +66,7 @@ public class Transaction {
         this.category = category;
     }
 
-    public Transaction(long id, String accountId, LocalDate date, String description, double amount) {
+    public Transaction(String id, String accountId, LocalDate date, String description, double amount) {
         this.id = id;
         this.accountId = accountId;
         this.date = date;

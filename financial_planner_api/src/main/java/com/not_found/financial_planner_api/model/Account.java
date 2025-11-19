@@ -27,23 +27,19 @@ public class Account {
 
     /**
      * Constructor for creating a new account
-     * @param id Unique identifier for the account
      * @param name Name of the account (e.g., "Checking", "Savings")
      * @param balance Initial balance of the account
      */
-    public Account(long id, String name, double balance, String customerName, boolean subscriptionType, String dateJoined,
-                   int age, String gender, String phoneNumber, String email, String dob) {
-        this.id = id;
-        this.accountName = name;
+    public Account(double balance, String customerName, boolean subscriptionType, String dateJoined) {
         this.balance = balance;
         this.customerName = customerName;
         this.subscriptionPlan = subscriptionType;
-        this.dateJoined = dateJoined;
-        this.age = age;
-        this.gender = gender;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.dob = dob;
+        // this.dateJoined = dateJoined;
+        // this.age = age;
+        // this.gender = gender;
+        // this.phoneNumber = phoneNumber;
+        // this.email = email;
+        // this.dob = dob;
     }
     public String getSubscriptionPlan(){
         if (subscriptionPlan) {
