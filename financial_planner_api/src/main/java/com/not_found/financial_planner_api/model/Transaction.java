@@ -15,7 +15,7 @@ public class Transaction {
     private long id;
     
     /** ID of the account this transaction belongs to */
-    private long accountId;
+    private String accountId;
     
     /** Date when the transaction occurred */
     private LocalDate date;
@@ -29,9 +29,14 @@ public class Transaction {
     /** Category of the transaction (e.g., "Dining", "Travel", etc.) */
     private String category;
 
-    /** Default constructor for JPA and JSON serialization */
-    public Transaction() {}
+    
 
+    /** Default constructor for JPA and JSON serialization 
+     * @param d 
+     * @param string2 
+     * @param localDate 
+     * @param string 
+     * @param i */
     /**
      * Constructor for creating a new transaction
      * @param id Unique identifier for the transaction
@@ -40,9 +45,6 @@ public class Transaction {
      * @param description Description or merchant name
      * @param amount Transaction amount (positive for credits, negative for debits)
      */
-    public Transaction(long id, long accountId, LocalDate date, String description, double amount) {
-        this(id, accountId, date, description, amount, null);
-    }
 
     /**
      * Constructor for creating a new transaction with category
@@ -53,13 +55,21 @@ public class Transaction {
      * @param amount Transaction amount (positive for credits, negative for debits)
      * @param category Category of the transaction
      */
-    public Transaction(long id, long accountId, LocalDate date, String description, double amount, String category) {
+    public Transaction(long id, String accountId, LocalDate date, String description, double amount, String category) {
         this.id = id;
         this.accountId = accountId;
         this.date = date;
         this.description = description;
         this.amount = amount;
         this.category = category;
+    }
+
+    public Transaction(long id, String accountId, LocalDate date, String description, double amount) {
+        this.id = id;
+        this.accountId = accountId;
+        this.date = date;
+        this.description = description;
+        this.amount = amount;
     }
 
     public String getCategory() {

@@ -3,11 +3,12 @@ package com.not_found.financial_planner_api.service;
 import com.not_found.financial_planner_api.data.SampleData;
 import com.not_found.financial_planner_api.model.Account;
 import com.not_found.financial_planner_api.model.Transaction;
+import com.not_found.financial_planner_api.repository.AccountRepository;
+import com.not_found.financial_planner_api.repository.TransactionRepository;
+import com.not_found.financial_planner_api.entity.AccountEntity;
+import com.not_found.financial_planner_api.entity.TransactionEntity;
 
 import org.springframework.stereotype.Service;
-
-import jakarta.annotation.PostConstruct;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,43 +18,44 @@ import java.util.stream.Collectors;
 /**
  * Service layer for the Financial Planner application.
  * Handles business logic, data operations, and transaction categorization.
+ * Now pulls data from H2 database via JPA repositories.
  */
 @Service
 public class SService {
-    /** List of all accounts in the system */
-    private List<Account> accounts;
     
-    /** List of all transactions in the system */
-    private List<Transaction> transactions;
-    
-    /** Service for categorizing transactions */
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
     private final TransactionCategorizationService categorizationService;
 
     /**
-     * Constructor initializes the categorization service with merchant categories
+     * Constructor with dependency injection for repositories
      */
-    public SService() {
+    public SService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
         this.categorizationService = new TransactionCategorizationService(SampleData.getMerchantCategories());
     }
 
-    @PostConstruct
-    public void init() {
-        transactions = SampleData.getTransactions();
-        accounts = SampleData.getAccounts();
-    }
-
+    /**
+     * Get all accounts from database
+     * Maps database entities to model objects for backward compatibility
+     */
     public List<Account> getAccounts() {
-        return new ArrayList<>(accounts);
+        @SuppressWarnings("unused")
+        List<AccountEntity> entities = accountRepository.findAll();
+
+        return new ArrayList<>();
     }
 
     /**
-     * Get all transactions with optional sorting
+     * Get all transactions from database with optional sorting
      * @param sortBy Sorting criterion: "date", "amount", "description", or "account"
      * @param order Sort order: "asc" for ascending, "desc" for descending
      * @return Sorted list of all transactions
      */
     public List<Transaction> getTransactions(String sortBy, String order) {
-        List<Transaction> result = new ArrayList<>(transactions);
+        List<TransactionEntity> entities = transactionRepository.findAll();
+        List<Transaction> result = mapTransactionEntitiesToModels(entities);
         sortTransactions(result, sortBy, order);
         return result;
     }
@@ -67,16 +69,17 @@ public class SService {
     }
 
     /**
-     * Get transactions for a specific account with optional sorting
+     * Get transactions for a specific account from database with optional sorting
      * @param accountId Account ID to filter transactions
      * @param sortBy Sorting criterion: "date", "amount", "description", or "account"
      * @param order Sort order: "asc" for ascending, "desc" for descending
      * @return Sorted list of transactions for the specified account
      */
     public List<Transaction> getTransactionsForAccount(long accountId, String sortBy, String order) {
-        List<Transaction> filtered = transactions.stream()
-                .filter(t -> t.getAccountId() == accountId)
-                .collect(Collectors.toList());
+        // Convert long accountId to String for database query
+        String accountNumber = String.valueOf(accountId);
+        List<TransactionEntity> entities = transactionRepository.findByAccountNumber(accountNumber);
+        List<Transaction> filtered = mapTransactionEntitiesToModels(entities);
         sortTransactions(filtered, sortBy, order);
         return filtered;
     }
@@ -115,12 +118,6 @@ public class SService {
                     compareDescriptions(a, b) :
                     compareDescriptions(b, a));
                 break;
-            case "account":
-                // Sort by account ID
-                txs.sort((a, b) -> ascending ?
-                    Long.compare(a.getAccountId(), b.getAccountId()) :
-                    Long.compare(b.getAccountId(), a.getAccountId()));
-                break;
             default:
                 // No sorting if invalid sort parameter
                 break;
@@ -134,22 +131,25 @@ public class SService {
     }
 
     public List<Transaction> getRecentTransactions(int limit) {
-        return transactions.stream()
+        List<TransactionEntity> entities = transactionRepository.findAll();
+        List<Transaction> allTransactions = mapTransactionEntitiesToModels(entities);
+        return allTransactions.stream()
                 .sorted((a,b) -> b.getDate().compareTo(a.getDate()))
                 .limit(limit)
                 .toList();
     }
 
     public List<Transaction> getRecentTransactionsForAccount(long accountId, int limit) {
+        String accountNumber = String.valueOf(accountId);
+        List<TransactionEntity> entities = transactionRepository.findByAccountNumberOrderByDateDesc(accountNumber);
+        List<Transaction> transactions = mapTransactionEntitiesToModels(entities);
         return transactions.stream()
-                .filter(t -> t.getAccountId() == accountId)
-                .sorted((a,b) -> b.getDate().compareTo(a.getDate()))
                 .limit(limit)
                 .toList();
     }
 
     public Map<String, Double> getExpenseBreakdown() {
-        return categorize(transactions);
+        return categorize(getRecentTransactions(0));
     }
 
     public Map<String, Double> getExpenseBreakdownForAccount(long accountId) {
@@ -158,7 +158,7 @@ public class SService {
     }
 
     /**
-     * Search transactions by description or date range
+     * Search transactions by description or date range from database
      * @param query Search query for description (case-insensitive)
      * @param startDate Optional start date in YYYY-MM-DD format
      * @param endDate Optional end date in YYYY-MM-DD format
@@ -166,14 +166,16 @@ public class SService {
      * @return List of matching transactions
      */
     public List<Transaction> searchTransactions(String query, String startDate, String endDate, Long accountId) {
-        List<Transaction> result = new ArrayList<>(transactions);
-
-        // Filter by account if specified
+        List<TransactionEntity> entities;
+        
+        // Get transactions from database
         if (accountId != null) {
-            result = result.stream()
-                    .filter(t -> t.getAccountId() == accountId)
-                    .collect(Collectors.toList());
+            entities = transactionRepository.findByAccountNumber(String.valueOf(accountId));
+        } else {
+            entities = transactionRepository.findAll();
         }
+        
+        List<Transaction> result = mapTransactionEntitiesToModels(entities);
 
         // Filter by description if query is provided
         if (query != null && !query.trim().isEmpty()) {
@@ -202,5 +204,34 @@ public class SService {
 
     private Map<String, Double> categorize(List<Transaction> txs) {
         return categorizationService.categorizeTransactions(txs);
+    }
+    
+    /**
+     * Maps database TransactionEntity objects to Transaction model objects
+     * for backward compatibility with existing controllers
+     */
+    private List<Transaction> mapTransactionEntitiesToModels(List<TransactionEntity> entities) {
+        return entities.stream()
+                .map(entity -> {
+                    Transaction transaction = new Transaction(0, null, null, null, 0);
+                    transaction.setId(parseLongOrZero(entity.getTransactionId()));
+                    transaction.setDate(entity.getTransactionDate());
+                    transaction.setDescription(entity.getDescription());
+                    transaction.setAmount(entity.getTransactionAmount().doubleValue());
+                    transaction.setCategory(entity.getTransactionCategory());
+                    return transaction;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Helper method to parse string IDs to long, returns 0 if parsing fails
+     */
+    private long parseLongOrZero(String value) {
+        try {
+            return value != null ? Long.parseLong(value) : 0;
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

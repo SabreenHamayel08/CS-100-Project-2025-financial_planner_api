@@ -246,6 +246,7 @@ public class ApiController {
     /**
      * Helper method to get spending aggregation for the last 12 months
      */
+    @SuppressWarnings("null")
     private List<MonthlySpending> getLastTwelveMonthsSpending(Long accountId) {
         List<MonthlySpending> result = new ArrayList<>();
         LocalDate now = LocalDate.now();
@@ -379,6 +380,7 @@ public class ApiController {
      * @param month Month in YYYY-MM format (e.g., 2025-10)
      * @return Map of account details to spending summaries
      */
+    @SuppressWarnings("null")
     @GetMapping("/spending/{month}")
     public Map<String, Map<String, Object>> getMonthlySpending(@PathVariable("month") String month) {
         // Validate month format

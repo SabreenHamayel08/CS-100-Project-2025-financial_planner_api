@@ -107,6 +107,7 @@ public class RewardsService {
         );
     }
 
+    @SuppressWarnings("null")
     private RewardsAnalysis.RewardsSummary calculateCurrentRewards(List<Transaction> transactions) {
         RewardsAnalysis.RewardsSummary summary = new RewardsAnalysis.RewardsSummary();
         Map<String, Double> pointsByCategory = new HashMap<>();
@@ -246,6 +247,7 @@ public class RewardsService {
     }
 
     
+    @SuppressWarnings("null")
     private Map<String, Double> calculateRewardsByCategory(List<Transaction> transactions, 
             RewardCard card) {
         Map<String, Double> rewards = new HashMap<>();

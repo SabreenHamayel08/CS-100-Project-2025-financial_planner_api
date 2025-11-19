@@ -9,12 +9,42 @@
             "name": "FinancialPlannerApiApplication",
             "request": "launch",
             "mainClass": "com.not_found.financial_planner_api.FinancialPlannerApiApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "TempStats",
+            "request": "launch",
+            "mainClass": "TempStats",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "Attach to Remote Program",
+            "request": "attach",
+            "hostName": "FinancialPlanner.NF.com",
+            "port": "<debug port of remote debuggee>"
+        },
+        {
+            "name": "Attach to Chrome",
+            "port": 9222,
+            "request": "attach",
+            "type": "chrome",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "java",
+            "name": "FinancialPlannerApiApplication",
+            "request": "launch",
+            "mainClass": "com.not_found.financial_planner_api.FinancialPlannerApiApplication",
             "projectName": "financial_planner_api"
         },
         {
-            "type": "jdk",
+            "type": "java",
+            "name": "FinancialPlannerWebApplication",
             "request": "launch",
-            "name": "Launch Java App"
+            "mainClass": "com.not_found.financial_planner_web.FinancialPlannerWebApplication",
+            "projectName": "financial_planner_web"
         }
     ]
 }
