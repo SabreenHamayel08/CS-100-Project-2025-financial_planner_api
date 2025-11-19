@@ -21,14 +21,14 @@ INSERT INTO credit_card (card_id, card_name, issuer, card_network, reward_rate_d
 ('card-005', 'Discover It Cash Back', 'Discover', 'Discover', 1.00, 1.00, 5.00, 1.00, 1.00);
 
 -- Insert Accounts
-INSERT INTO account (account_number, user_id, card_id, account_name, account_type, institution) VALUES
-('acc-001', 'user-001', 'card-001', 'Chase Checking', 'checking', 'Chase Bank'),
-('acc-002', 'user-001', 'card-001', 'Chase Sapphire Card', 'credit_card', 'Chase Bank'),
-('acc-003', 'user-002', 'card-002', 'Amex Gold Card', 'credit_card', 'American Express'),
-('acc-004', 'user-002', NULL, 'Bank of America Savings', 'savings', 'Bank of America'),
-('acc-005', 'user-003', 'card-003', 'Citi Double Cash Card', 'credit_card', 'Citibank'),
-('acc-006', 'user-003', NULL, 'Wells Fargo Checking', 'checking', 'Wells Fargo'),
-('acc-007', 'user-004', 'card-005', 'Discover Card', 'credit_card', 'Discover');
+INSERT INTO account (account_number, user_id, card_id, account_name, account_type, account_amount, institution) VALUES
+('acc-001', 'user-001', 'card-001', 'Chase Checking', 'checking', '5000.00', 'Chase Bank'),
+('acc-002', 'user-001', 'card-001', 'Chase Sapphire Card', 'credit_card', '0.00', 'Chase Bank'),
+('acc-003', 'user-002', 'card-002', 'Amex Gold Card', 'credit_card', '0.00', 'American Express'),
+('acc-004', 'user-002', NULL, 'Bank of America Savings', 'savings', '10000.00', 'Bank of America'),
+('acc-005', 'user-003', 'card-003', 'Citi Double Cash Card', 'credit_card', '0.00', 'Citibank'),
+('acc-006', 'user-003', NULL, 'Wells Fargo Checking', 'checking', '7500.00', 'Wells Fargo'),
+('acc-007', 'user-004', 'card-005', 'Discover Card', 'credit_card', '0.00', 'Discover');
 
 -- Insert Transactions
 INSERT INTO transactions (transaction_id, account_number, transaction_date, description, transaction_amount, transaction_category) VALUES

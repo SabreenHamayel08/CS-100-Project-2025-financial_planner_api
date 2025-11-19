@@ -103,7 +103,7 @@ public class RewardsService {
             null, 
             oneYearAgo.toString(), 
             LocalDate.now().toString(),
-            userId
+            String.valueOf(userId)
         );
     }
 
@@ -202,6 +202,9 @@ public class RewardsService {
 
     public String determineCategory(Transaction transaction) {
         // Simple heuristic based on description keywords
+        if (transaction.getDescription() == null) {
+            return "other";
+        }
         String desc = transaction.getDescription().toLowerCase();
         if (desc.contains("grocery") || desc.contains("supermarket") || desc.contains("coffee")) {
             return "groceries";

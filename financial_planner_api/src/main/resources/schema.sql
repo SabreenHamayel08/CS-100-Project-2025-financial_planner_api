@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS account (
     card_id         VARCHAR(64),
     account_name    VARCHAR(120) NOT NULL,
     account_type    VARCHAR(40) NOT NULL,
+    account_amount  VARCHAR(40) NOT NULL,
     institution     VARCHAR(120),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (card_id) REFERENCES credit_card(card_id)

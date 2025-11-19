@@ -13,8 +13,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     List<TransactionEntity> findByAccountNumber(String accountNumber);
     List<TransactionEntity> findByTransactionDateBetween(LocalDate startDate, LocalDate endDate);
     List<TransactionEntity> findByTransactionCategory(String category);
-    List<TransactionEntity> findByAccountId(long accountId);
-    
     
     @Query("SELECT t FROM TransactionEntity t WHERE t.accountNumber = :accountNumber ORDER BY t.transactionDate DESC")
     List<TransactionEntity> findByAccountNumberOrderByDateDesc(String accountNumber);

@@ -101,7 +101,7 @@ public class ApiController {
      */
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions")
-    public List<Transaction> getTransactionsForAccount(@PathVariable("id") long id) {
+    public List<Transaction> getTransactionsForAccount(@PathVariable("id") String id) {
         return dataService.getTransactionsForAccount(id);
     }
 
@@ -112,33 +112,33 @@ public class ApiController {
      */
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-date/asc")
-    public List<Transaction> getAccountTransactionsByDateAsc(@PathVariable("id") long id) {
+    public List<Transaction> getAccountTransactionsByDateAsc(@PathVariable("id") String id) {
         return dataService.getTransactionsForAccount(id, "date", "asc");
     }
 
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-date/desc")
-    public List<Transaction> getAccountTransactionsByDateDesc(@PathVariable("id") long id) {
+    public List<Transaction> getAccountTransactionsByDateDesc(@PathVariable("id") String id) {
         return dataService.getTransactionsForAccount(id, "date", "desc");
     }
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-amount/asc")
-    public List<Transaction> getAccountTransactionsByAmountAsc(@PathVariable("id") long id) {
+    public List<Transaction> getAccountTransactionsByAmountAsc(@PathVariable("id") String id) {
         return dataService.getTransactionsForAccount(id, "amount", "asc");
     }
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-amount/desc")
-    public List<Transaction> getAccountTransactionsByAmountDesc(@PathVariable("id") long id) {
+    public List<Transaction> getAccountTransactionsByAmountDesc(@PathVariable("id") String id) {
         return dataService.getTransactionsForAccount(id, "amount", "desc");
     }
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-description/asc")
-    public List<Transaction> getAccountTransactionsByDescriptionAsc(@PathVariable("id") long id) {
+    public List<Transaction> getAccountTransactionsByDescriptionAsc(@PathVariable("id") String id) {
         return dataService.getTransactionsForAccount(id, "description", "asc");
     }
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions/by-description/desc")
-    public List<Transaction> getAccountTransactionsByDescriptionDesc(@PathVariable("id") long id) {
+    public List<Transaction> getAccountTransactionsByDescriptionDesc(@PathVariable("id") String id) {
         return dataService.getTransactionsForAccount(id, "description", "desc");
     }
     @CrossOrigin(origins = "http://localhost:5173")
@@ -206,7 +206,7 @@ public class ApiController {
             @org.springframework.web.bind.annotation.RequestParam(required = false) String query,
             @org.springframework.web.bind.annotation.RequestParam(required = false) String startDate,
             @org.springframework.web.bind.annotation.RequestParam(required = false) String endDate,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) Long accountId
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String accountId
     ) {
         return dataService.searchTransactions(query, startDate, endDate, accountId);
     }
@@ -215,7 +215,7 @@ public class ApiController {
     private TransactionCategorizationService TransactionCategorizationService;
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/dashboard")
-    public com.not_found.financial_planner_api.model.DashboardResponse getDashboard(@org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId) {
+    public com.not_found.financial_planner_api.model.DashboardResponse getDashboard(@org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) String accountId) {
         List<Transaction> recent;
         java.util.Map<String, Double> breakdown;
         RewardsAnalysis.CardRecommendation bestCard;
@@ -257,7 +257,7 @@ public class ApiController {
      * Helper method to get spending aggregation for the last 12 months
      */
     @SuppressWarnings("null")
-    private List<MonthlySpending> getLastTwelveMonthsSpending(Long accountId) {
+    private List<MonthlySpending> getLastTwelveMonthsSpending(String accountId) {
         List<MonthlySpending> result = new ArrayList<>();
         LocalDate now = LocalDate.now();
         
@@ -322,7 +322,6 @@ public class ApiController {
                 inc.add(p.trim().toLowerCase());
             }
         }
-        accountId = "acc-001";
 
         List<Account> accounts = null;
         List<Transaction> transactions = null;
@@ -353,7 +352,7 @@ public class ApiController {
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/rewards")
     public RewardsAnalysis getRewardsAnalysis(
-            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId
+            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) String accountId
     ) {
         List<Transaction> transactions = (accountId == null) ? 
             dataService.getTransactions() : 
@@ -372,7 +371,7 @@ public class ApiController {
     @GetMapping("/bestCardRecommendation/{date}")
     public RewardsAnalysis.CardRecommendation getBestCardRecommendation(
             @PathVariable("date") String date,
-            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) Long accountId
+            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) String accountId
     ) {
         List<Transaction> transactions = (accountId == null) ? 
             dataService.searchTransactions(null, null, date, accountId) : 
@@ -442,7 +441,7 @@ public class ApiController {
         
             
             // Add to result
-            result.put(String.valueOf(account.getId()), accountSummary);
+            result.put(account.getId(), accountSummary);
         }
         
         return result;

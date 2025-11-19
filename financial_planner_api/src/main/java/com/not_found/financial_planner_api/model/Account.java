@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Account {
-    private long id; // Unique identifier for the account
+    private String id; // Unique identifier for the account
     private String customerName; // Name of the account holder
     private String dateJoined; // Date when the account was created
     private boolean subscriptionPlan; // true for Premium, false for Basic

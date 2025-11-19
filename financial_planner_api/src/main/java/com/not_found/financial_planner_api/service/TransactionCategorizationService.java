@@ -71,7 +71,7 @@ public class TransactionCategorizationService {
     private String classifyByAmount(double amount) {
         List<Transaction> transactions = SampleData.getTransactions();
         for(Transaction tx : transactions){
-            if (tx.getCategory() == "Gas"){
+            if ("Gas".equals(tx.getCategory())){
                 return CATEGORY_TRANSPORTATION; // Gas purchases
             } else if (amount < 20.0) {
                 return CATEGORY_GROCERIES; // Small purchases likely groceries

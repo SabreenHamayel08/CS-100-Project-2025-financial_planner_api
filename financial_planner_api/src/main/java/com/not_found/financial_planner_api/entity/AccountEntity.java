@@ -27,10 +27,10 @@ public class AccountEntity {
     @Column(name = "account_name", length = 120, nullable = false)
     private String accountName;
     
-    @Column(name = "account_amount", length = 40, nullable = false)
+    @Column(name = "account_type", length = 40, nullable = false)
     private String accountType;
 
-    @Column(name = "account_type", length = 40, nullable = false)
+    @Column(name = "account_amount", length = 40, nullable = false)
     private String accountAmount;
     
     @Column(name = "institution", length = 120)

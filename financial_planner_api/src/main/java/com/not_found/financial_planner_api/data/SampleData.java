@@ -55,7 +55,7 @@ public class SampleData {
     public static List<Transaction> getTransactionsByAccountId(String id) {
         List<Transaction> result = new ArrayList<>();
         for (Transaction t : transactions) {
-            if (t.getAccountId() == id) {
+            if (id != null && id.equals(t.getAccountId())) {
                 result.add(t);
             }
         }

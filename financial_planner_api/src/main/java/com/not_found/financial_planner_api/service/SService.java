@@ -44,8 +44,8 @@ public class SService {
         return entities.stream()
                 .map(entity -> {
                     Account account = new Account();
-                    // Account.id is long, AccountEntity.accountNumber is String
-                    account.setId(parseLongOrZero(entity.getAccountNumber()));
+                    // Account.id is now String, matches AccountEntity.accountNumber
+                    account.setId(entity.getAccountNumber());
                     account.setAccountName(entity.getAccountName());
                     account.setCustomerName(entity.getAccountName());
                     // Other Account fields (customerName, balance, etc.) are not yet stored in the DB
@@ -82,16 +82,16 @@ public class SService {
      * @param order Sort order: "asc" for ascending, "desc" for descending
      * @return Sorted list of transactions for the specified account
      */
-    public List<Transaction> getTransactionsForAccount(long accountId, String sortBy, String order) {
-        // Convert long accountId to String for database query
-        String accountNumber = String.valueOf(accountId);
+    public List<Transaction> getTransactionsForAccount(String accountId, String sortBy, String order) {
+        // accountId is already String format
+        String accountNumber = accountId;
         List<TransactionEntity> entities = transactionRepository.findByAccountNumber(accountNumber);
         List<Transaction> filtered = mapTransactionEntitiesToModels(entities);
         sortTransactions(filtered, sortBy, order);
         return filtered;
     }
  
-    public List<Transaction> getTransactionsForAccount(long accountId) {
+    public List<Transaction> getTransactionsForAccount(String accountId) {
         return getTransactionsForAccount(accountId, null, null);
     }
  
@@ -146,8 +146,8 @@ public class SService {
                 .toList();
     }
  
-    public List<Transaction> getRecentTransactionsForAccount(long accountId, int limit) {
-        String accountNumber = String.valueOf(accountId);
+    public List<Transaction> getRecentTransactionsForAccount(String accountId, int limit) {
+        String accountNumber = accountId;
         List<TransactionEntity> entities = transactionRepository.findByAccountNumberOrderByDateDesc(accountNumber);
         List<Transaction> transactions = mapTransactionEntitiesToModels(entities);
         return transactions.stream()
@@ -156,10 +156,10 @@ public class SService {
     }
  
     public Map<String, Double> getExpenseBreakdown() {
-        return categorize(getRecentTransactions(0));
+        return categorize(getTransactions());
     }
  
-    public Map<String, Double> getExpenseBreakdownForAccount(long accountId) {
+    public Map<String, Double> getExpenseBreakdownForAccount(String accountId) {
         List<Transaction> tx = getTransactionsForAccount(accountId);
         return categorize(tx);
     }
@@ -169,15 +169,15 @@ public class SService {
      * @param query Search query for description (case-insensitive)
      * @param startDate Optional start date in YYYY-MM-DD format
      * @param endDate Optional end date in YYYY-MM-DD format
-     * @param accountId Optional account ID to filter transactions
+     * @param accountId Optional account ID (alphanumeric) to filter transactions
      * @return List of matching transactions
      */
-    public List<Transaction> searchTransactions(String query, String startDate, String endDate, Long accountId) {
+    public List<Transaction> searchTransactions(String query, String startDate, String endDate, String accountId) {
         List<TransactionEntity> entities;
         
         // Get transactions from database
         if (accountId != null) {
-            entities = transactionRepository.findByAccountNumber(String.valueOf(accountId));
+            entities = transactionRepository.findByAccountNumber(accountId);
         } else {
             entities = transactionRepository.findAll();
         }
@@ -231,15 +231,5 @@ public class SService {
                 .collect(Collectors.toList());
     }
     
-    /**
-     * Helper method to parse string IDs to long, returns 0 if parsing fails
-     */
-    private long parseLongOrZero(String value) {
-        try {
-            return value != null ? Long.parseLong(value) : 0;
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
 }
  
