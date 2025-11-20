@@ -5,6 +5,7 @@ import com.not_found.financial_planner_api.model.Transaction;
 import com.not_found.financial_planner_api.model.RewardsAnalysis;
 import com.not_found.financial_planner_api.service.SService;
 import com.not_found.financial_planner_api.service.TransactionCategorizationService;
+import com.not_found.financial_planner_api.service.AnalyticsService;
 import com.not_found.financial_planner_api.service.RewardsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.not_found.financial_planner_api.model.MonthlySpending;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -33,15 +36,17 @@ public class ApiController {
     /** Service layer for handling business logic and data operations */
     private final SService dataService;
     private final RewardsService rewardsService;
+    
 
     /**
      * Constructor for dependency injection of the service layers
      * @param dataService The service layer instance for data operations
      * @param rewardsService The service layer instance for rewards analysis
      */
-    public ApiController(SService dataService, RewardsService rewardsService) {
+    public ApiController(SService dataService, RewardsService rewardsService, AnalyticsService analyticsService) {
         this.dataService = dataService;
         this.rewardsService = rewardsService;
+        this.analyticsService = analyticsService;
     }
 
     /**
@@ -86,7 +91,7 @@ public class ApiController {
         List<Account> allAccounts = dataService.getAccounts();
         List<Account> filteredAccounts = new ArrayList<>();
         for (Account account : allAccounts) {
-            if (account.getCustomerName().equalsIgnoreCase(name)) {
+            if (account.getAccountName().equalsIgnoreCase(name)) {
                 filteredAccounts.add(account);
             }
         }
@@ -304,43 +309,19 @@ public class ApiController {
         
         return result;
     }
+    private final AnalyticsService analyticsService;
     @CrossOrigin(origins = "http://localhost:5173")
-    @GetMapping("/data")
-    public com.not_found.financial_planner_api.model.AllDataResponse getAllData(
-            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) String accountId,
-            @org.springframework.web.bind.annotation.RequestParam(value = "include", required = false) String include
-    ) {
-        // parse include param (comma-separated). If absent or empty => include all sections
-        java.util.Set<String> inc = new java.util.HashSet<>();
-        if (include == null || include.isBlank()) {
-            inc.add("accounts");
-            inc.add("transactions");
-            inc.add("dashboard");
-        } else {
-            String[] parts = include.split(",");
-            for (String p : parts) {
-                inc.add(p.trim().toLowerCase());
-            }
-        }
-
-        List<Account> accounts = null;
-        List<Transaction> transactions = null;
-        com.not_found.financial_planner_api.model.DashboardResponse dashboard = null;
-
-        if (inc.contains("accounts")) {
-            accounts = dataService.getAccounts();
-        }
-
-        if (inc.contains("transactions")) {
-            transactions = (accountId == null) ? dataService.getTransactions() : dataService.getTransactionsForAccount(accountId);
-        }
-
-        if (inc.contains("dashboard")) {
-            dashboard = getDashboard(accountId);
-        }
-
-        return new com.not_found.financial_planner_api.model.AllDataResponse(accounts, transactions, dashboard);
+    @GetMapping("/expenses/pie")
+    public Map<String, BigDecimal> getExpensePieChart() {
+        return analyticsService.getExpenseCategoryPieChart();
     }
+    @CrossOrigin(origins = "http://localhost:5173")
+    @GetMapping("/income/predict")
+    public Map<String, BigDecimal> predictIncome(
+            @RequestParam(defaultValue = "3") int months) {
+        return analyticsService.predictFutureIncome(months);
+    }
+
 
     /**
      * Get rewards analysis for transactions. Can be filtered by account ID.
@@ -411,7 +392,7 @@ public class ApiController {
             
             // Get transactions for this account in the specified month
             List<Transaction> transactions = dataService.searchTransactions(
-                null, startDate, endDate, account.getId());
+                null, startDate, endDate, account.getAccountNumber());
             
             // Calculate spending metrics
             double totalSpent = transactions.stream()
@@ -441,7 +422,7 @@ public class ApiController {
         
             
             // Add to result
-            result.put(account.getId(), accountSummary);
+            result.put(String.valueOf(account.getAccountNumber()), accountSummary);
         }
         
         return result;

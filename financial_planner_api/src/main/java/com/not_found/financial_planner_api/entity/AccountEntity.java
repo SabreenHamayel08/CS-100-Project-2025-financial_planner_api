@@ -1,5 +1,7 @@
 package com.not_found.financial_planner_api.entity;
 
+import com.not_found.financial_planner_api.model.Account;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,5 +46,17 @@ public class AccountEntity {
     @JoinColumn(name = "card_id", referencedColumnName = "card_id", insertable = false, updatable = false)
     private CreditCard creditCard;
 
+    public Double getBalance() {
+        return Double.valueOf(accountAmount);
+    }
+
+    public String getSubscriptionPlan(){
+        Account account = new Account();
+        if (account.getSubscriptionPlan().equals("Premium")) {
+            return "Premium";
+        } else {
+            return "Basic";
+        }
     
+}
 }

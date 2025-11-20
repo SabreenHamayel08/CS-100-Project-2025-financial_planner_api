@@ -57,14 +57,6 @@ public class Transaction {
      */
     public Transaction() {}
     
-    public Transaction(String id, String accountId, LocalDate date, String description, double amount, String category) {
-        this.id = id;
-        this.accountId = accountId;
-        this.date = date;
-        this.description = description;
-        this.amount = amount;
-        this.category = category;
-    }
 
     public Transaction(String id, String accountId, LocalDate date, String description, double amount) {
         this.id = id;

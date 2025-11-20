@@ -10,10 +10,30 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionEntity, String> {
+
     List<TransactionEntity> findByAccountNumber(String accountNumber);
     List<TransactionEntity> findByTransactionDateBetween(LocalDate startDate, LocalDate endDate);
     List<TransactionEntity> findByTransactionCategory(String category);
-    
+
     @Query("SELECT t FROM TransactionEntity t WHERE t.accountNumber = :accountNumber ORDER BY t.transactionDate DESC")
     List<TransactionEntity> findByAccountNumberOrderByDateDesc(String accountNumber);
+
+    // ---- EXPENSE CATEGORY PIE CHART ----
+    @Query("""
+        SELECT t.transactionCategory, SUM(t.transactionAmount)
+        FROM TransactionEntity t
+        WHERE t.transactionAmount < 0
+        GROUP BY t.transactionCategory
+    """)
+    List<Object[]> getExpenseTotalsByCategory();
+
+    // ---- PREDICT INCOME TREND ----
+    @Query("""
+        SELECT FUNCTION('MONTH', t.transactionDate) AS month, SUM(t.transactionAmount)
+        FROM TransactionEntity t
+        WHERE t.transactionAmount > 0
+        GROUP BY FUNCTION('MONTH', t.transactionDate)
+        ORDER BY month
+    """)
+List<Object[]> getMonthlyTotals();
 }
