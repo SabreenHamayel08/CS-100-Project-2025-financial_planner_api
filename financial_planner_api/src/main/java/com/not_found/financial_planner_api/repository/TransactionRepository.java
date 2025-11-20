@@ -35,5 +35,20 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
         GROUP BY FUNCTION('MONTH', t.transactionDate)
         ORDER BY month
     """)
+    List<Object[]> getMonthlyIncomeTotals();
+
+@Query("SELECT FUNCTION('DATE_FORMAT', t.date, '%Y-%m'), SUM(t.amount) " +
+       "FROM Transaction t " +
+       "WHERE t.type = 'INCOME' " +
+       "GROUP BY FUNCTION('DATE_FORMAT', t.date, '%Y-%m') " +
+       "ORDER BY FUNCTION('DATE_FORMAT', t.date, '%Y-%m')")
 List<Object[]> getMonthlyTotals();
+
+//     // ---- INCOME ANALYSIS FOR PAST YEAR ----
+//     @Query(" SELECT FUNCTION('DATE_FORMAT', t.transactionDate, '%b') AS month, SUM(t.transactionAmount) " +
+//         "FROM TransactionEntity t WHERE t.transactionAmount > 0 " +
+//         "AND t.transactionDate >= FUNCTION('DATE_SUB', CURRENT_DATE, 'INTERVAL 1 YEAR') " + 
+//         "GROUP BY month " +
+//         "ORDER BY FUNCTION('MONTH', t.transactionDate) ")
+//     List<Object[]> getIncomePastYear();
 }

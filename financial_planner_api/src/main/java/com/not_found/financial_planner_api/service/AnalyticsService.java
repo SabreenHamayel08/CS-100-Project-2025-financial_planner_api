@@ -33,6 +33,29 @@ public class AnalyticsService {
         return map;
     }
 
+    // ------------------ INCOME ANALYSIS GRAPH (Past Year) ------------------
+    public Map<String, BigDecimal> getIncomeAnalysisPastYear() {
+        // List<Object[]> results = transactionRepository.getIncomePastYear();
+        List<Object[]> results = transactionRepository.getMonthlyIncomeTotals();        
+        Map<String, BigDecimal> monthlyIncome = new LinkedHashMap<>();
+        
+        // Initialize all months with zero
+        String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        for (String month : months) {
+            monthlyIncome.put(month, BigDecimal.ZERO);
+        }
+        
+        // Populate with actual data
+        for (Object[] row : results) {
+            String month = (String) row[0];
+            BigDecimal total = (BigDecimal) row[1];
+            monthlyIncome.put(month, total);
+        }
+        
+        return monthlyIncome;
+    }
+
     // ------------------ INCOME TREND PREDICTION ------------------
     public Map<String, BigDecimal> predictFutureIncome(int monthsAhead) {
 
