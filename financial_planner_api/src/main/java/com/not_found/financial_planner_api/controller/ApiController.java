@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-// import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.not_found.financial_planner_api.model.MonthlySpending;
@@ -310,8 +309,6 @@ public class ApiController {
         
         return result;
     }
-    
-
     private final AnalyticsService analyticsService;
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/expenses/pie")
@@ -324,7 +321,6 @@ public class ApiController {
             @RequestParam(defaultValue = "3") int months) {
         return analyticsService.predictFutureIncome(months);
     }
-    
 
 
     /**
