@@ -524,9 +524,9 @@ INSERT INTO transactions (transaction_id, account_number, transaction_date, desc
 ('txn-485', 'acc-007', '2023-10-20', 'Pharmacy - CVS', -41.60, 'healthcare'),
 ('txn-486', 'acc-007', '2023-10-18', 'Fast Food', -16.35, 'dining');
 
--- Insert Merchants
 INSERT INTO merchant (merchant_id, merchant_name, merchant_category) VALUES
 ('merch-001', 'Kroger', 'groceries'),
+ 
 ('merch-002', 'Whole Foods Market', 'groceries'),
 ('merch-003', 'Walmart', 'retail'),
 ('merch-004', 'Target', 'retail'),
@@ -541,3 +541,9 @@ INSERT INTO merchant (merchant_id, merchant_name, merchant_category) VALUES
 ('merch-013', 'Delta Airlines', 'travel'),
 ('merch-014', 'Marriott Hotels', 'travel'),
 ('merch-015', 'CVS Pharmacy', 'healthcare');
+
+-- Extra demo high-value spending to ensure rewards projections are visible
+INSERT INTO transactions (transaction_id, account_number, transaction_date, description, transaction_amount, transaction_category) VALUES
+('txn-extra-001', 'acc-002', '2024-11-10', 'Hotel - Luxury Stay', -2500.00, 'travel'),
+('txn-extra-002', 'acc-003', '2024-11-12', 'Fine Dining - Anniversary', -1200.00, 'dining'),
+('txn-extra-003', 'acc-005', '2024-11-08', 'Holiday Shopping - Electronics', -1800.00, 'shopping');

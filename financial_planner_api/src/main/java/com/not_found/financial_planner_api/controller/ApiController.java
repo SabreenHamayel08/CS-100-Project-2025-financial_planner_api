@@ -2,9 +2,12 @@ package com.not_found.financial_planner_api.controller;
 
 import com.not_found.financial_planner_api.model.Account;
 import com.not_found.financial_planner_api.model.Transaction;
+import com.not_found.financial_planner_api.repository.TransactionRepository;
 import com.not_found.financial_planner_api.model.RewardsAnalysis;
 import com.not_found.financial_planner_api.service.SService;
 import com.not_found.financial_planner_api.service.TransactionCategorizationService;
+
+
 import com.not_found.financial_planner_api.service.AnalyticsService;
 import com.not_found.financial_planner_api.service.RewardsService;
 
@@ -17,8 +20,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.not_found.financial_planner_api.model.MonthlySpending;
+import com.not_found.financial_planner_api.entity.AccountEntity;
+import com.not_found.financial_planner_api.repository.AccountRepository;
+
+
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -36,6 +44,8 @@ public class ApiController {
     /** Service layer for handling business logic and data operations */
     private final SService dataService;
     private final RewardsService rewardsService;
+    private final TransactionRepository transactionRepository;
+    private final AccountRepository accountRepository;
     
 
     /**
@@ -43,10 +53,12 @@ public class ApiController {
      * @param dataService The service layer instance for data operations
      * @param rewardsService The service layer instance for rewards analysis
      */
-    public ApiController(SService dataService, RewardsService rewardsService, AnalyticsService analyticsService) {
+    public ApiController(SService dataService, RewardsService rewardsService, AnalyticsService analyticsService, TransactionRepository transactionRepository, AccountRepository accountRepository) {
         this.dataService = dataService;
         this.rewardsService = rewardsService;
         this.analyticsService = analyticsService;
+        this.transactionRepository = transactionRepository;
+        this.accountRepository = accountRepository;
     }
 
     /**
@@ -107,7 +119,19 @@ public class ApiController {
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/accounts/{id}/transactions")
     public List<Transaction> getTransactionsForAccount(@PathVariable("id") String id) {
-        return dataService.getTransactionsForAccount(id);
+        return transactionRepository.findByAccountNumberOrderByDateDesc(id).stream()
+                .map(e -> {
+                    Transaction t = new Transaction();
+                    t.setId(e.getTransactionId());
+                    t.setAccountId(e.getAccountNumber());
+                    t.setDate(e.getTransactionDate());
+                    t.setDescription(e.getDescription());
+                    double amt = e.getTransactionAmount() != null ? e.getTransactionAmount().doubleValue() : 0.0;
+                    t.setAmount(java.math.BigDecimal.valueOf(amt).setScale(2, RoundingMode.HALF_UP).doubleValue());
+                    t.setCategory(e.getTransactionCategory());
+                    return t;
+                })
+                .toList();
     }
 
     /**
@@ -261,7 +285,6 @@ public class ApiController {
     /**
      * Helper method to get spending aggregation for the last 12 months
      */
-    @SuppressWarnings("null")
     private List<MonthlySpending> getLastTwelveMonthsSpending(String accountId) {
         List<MonthlySpending> result = new ArrayList<>();
         LocalDate now = LocalDate.now();
@@ -309,6 +332,8 @@ public class ApiController {
         
         return result;
     }
+    
+
     private final AnalyticsService analyticsService;
     @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/expenses/pie")
@@ -316,11 +341,86 @@ public class ApiController {
         return analyticsService.getExpenseCategoryPieChart();
     }
     @CrossOrigin(origins = "http://localhost:5173")
+    @GetMapping("/expenses/pie/{id}")
+    public Map<String, BigDecimal> getExpensePieChartForAccount(@PathVariable("id") String id) {
+        Map<String, BigDecimal> results = new HashMap<>();
+
+        // If 'id' is an account number, return pie for that account.
+        if (accountRepository.existsById(id)) {
+            List<Object[]> rows = transactionRepository.getExpenseTotalsByCategoryForAccount(id);
+            for (Object[] r : rows) {
+                String cat = String.valueOf(r[0]);
+                java.math.BigDecimal val = (java.math.BigDecimal) r[1];
+                java.math.BigDecimal outVal = val != null ? val.abs() : java.math.BigDecimal.ZERO;
+                results.put(cat, outVal.setScale(2, RoundingMode.HALF_UP));
+            }
+            return new TreeMap<>(results);
+        }
+
+        // Otherwise assume 'id' is a user id and aggregate across the user's accounts
+        List<AccountEntity> accounts = accountRepository.findByUserId(id);
+        if (accounts == null || accounts.isEmpty()) {
+            // no accounts or unknown id -> return empty map
+            return new TreeMap<>();
+        }
+
+        for (AccountEntity acc : accounts) {
+            String accNum = acc.getAccountNumber();
+            List<Object[]> rows = transactionRepository.getExpenseTotalsByCategoryForAccount(accNum);
+            for (Object[] r : rows) {
+                String cat = String.valueOf(r[0]);
+                java.math.BigDecimal val = (java.math.BigDecimal) r[1];
+                java.math.BigDecimal outVal = val != null ? val.abs() : java.math.BigDecimal.ZERO;
+                results.merge(cat, outVal, BigDecimal::add);
+            }
+        }
+
+        // Round aggregated values to 2 decimals
+        results.replaceAll((k, v) -> v.setScale(2, RoundingMode.HALF_UP));
+        return new TreeMap<>(results);
+    }
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/income/predict")
     public Map<String, BigDecimal> predictIncome(
             @RequestParam(defaultValue = "3") int months) {
         return analyticsService.predictFutureIncome(months);
     }
+    @CrossOrigin(origins = "http://localhost:5173")
+    @GetMapping("/income/predict/{id}")
+    public Map<String, BigDecimal> predictIncomeForAccount(@PathVariable("id") String id) {
+        // Use AnalyticsService for per-account income prediction (moved from SService)
+        return analyticsService.predictFutureIncomeForAccount(id, 3);
+    }
+    @CrossOrigin(origins = "http://localhost:5173")
+    @GetMapping("/income/analysis")
+    public Map<String, BigDecimal> incomeAnalysis() {
+        Map<String, BigDecimal> results = transactionRepository.getMonthlyTotals().stream().collect(
+            HashMap::new,
+            (map, row) -> {
+                String k = String.valueOf(row[0]);
+                java.math.BigDecimal v = (java.math.BigDecimal) row[1];
+                map.put(k, v != null ? v.setScale(2, RoundingMode.HALF_UP) : java.math.BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+            },
+            HashMap::putAll
+        );
+        return new TreeMap<> (results);
+    }
+
+    @CrossOrigin(origins = "http://localhost:5173")
+    @GetMapping("/income/analysis/{id}")
+    public Map<String, BigDecimal> incomeAnalysisForAccount(@PathVariable("id") String id) {
+        Map<String, BigDecimal> results = transactionRepository.getMonthlyTotalsForAccount(id).stream().collect(
+            HashMap::new,
+            (map, row) -> {
+                String k = String.valueOf(row[0]);
+                java.math.BigDecimal v = (java.math.BigDecimal) row[1];
+                map.put(k, v != null ? v.setScale(2, RoundingMode.HALF_UP) : java.math.BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+            },
+            HashMap::putAll
+        );
+        return new TreeMap<> (results);
+    }
+    
 
 
     /**
@@ -335,96 +435,87 @@ public class ApiController {
     public RewardsAnalysis getRewardsAnalysis(
             @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) String accountId
     ) {
-        List<Transaction> transactions = (accountId == null) ? 
-            dataService.getTransactions() : 
-            dataService.getTransactionsForAccount(accountId);
-        
+        List<Transaction> transactions;
+        if (accountId == null) {
+            // load all transactions from repository (DB-backed)
+            transactions = transactionRepository.findAll().stream().map(e -> {
+                Transaction t = new Transaction();
+                t.setId(e.getTransactionId());
+                t.setAccountId(e.getAccountNumber());
+                t.setDate(e.getTransactionDate());
+                t.setDescription(e.getDescription());
+                double amt = e.getTransactionAmount() != null ? e.getTransactionAmount().doubleValue() : 0.0;
+                t.setAmount(java.math.BigDecimal.valueOf(amt).setScale(2, RoundingMode.HALF_UP).doubleValue());
+                t.setCategory(e.getTransactionCategory());
+                return t;
+            }).toList();
+        } else {
+            // load transactions for a specific account from repository
+            transactions = transactionRepository.findByAccountNumberOrderByDateDesc(accountId).stream().map(e -> {
+                Transaction t = new Transaction();
+                t.setId(e.getTransactionId());
+                t.setAccountId(e.getAccountNumber());
+                t.setDate(e.getTransactionDate());
+                t.setDescription(e.getDescription());
+                double amt = e.getTransactionAmount() != null ? e.getTransactionAmount().doubleValue() : 0.0;
+                t.setAmount(java.math.BigDecimal.valueOf(amt).setScale(2, RoundingMode.HALF_UP).doubleValue());
+                t.setCategory(e.getTransactionCategory());
+                return t;
+            }).toList();
+        }
+
+        // Use RewardsService analyzeRewards which will load relevant cards internally
         return rewardsService.analyzeRewards(transactions);
     }
 
     /**
-     * Get the best card recommendation based on spending patterns up to a specific date
-     * 
-     * @param date The date up to which to analyze transactions (format: YYYY-MM-DD)
-     * @return CardRecommendation for the most beneficial rewards card
+     * Return a static projected annual return per account (demo/static values).
      */
     @CrossOrigin(origins = "http://localhost:5173")
-    @GetMapping("/bestCardRecommendation/{date}")
-    public RewardsAnalysis.CardRecommendation getBestCardRecommendation(
-            @PathVariable("date") String date,
-            @org.springframework.web.bind.annotation.RequestParam(value = "accountId", required = false) String accountId
-    ) {
-        List<Transaction> transactions = (accountId == null) ? 
-            dataService.searchTransactions(null, null, date, accountId) : 
-            dataService.searchTransactions(null, null, date, accountId);
-
-        // Get full rewards analysis
-        RewardsAnalysis analysis = rewardsService.analyzeRewards(transactions);
-        
-        // Return the top recommendation (first in the sorted list)
-        List<RewardsAnalysis.CardRecommendation> recommendations = analysis.getRecommendedCards();
-        return recommendations != null && !recommendations.isEmpty() ? 
-            recommendations.get(0) : null;
+    @GetMapping("/rewards/accounts")
+    public java.util.List<java.util.Map<String, Object>> getRewardsPerAccount() {
+        java.util.List<Account> accounts = dataService.getAccounts();
+        java.util.List<java.util.Map<String, Object>> out = new ArrayList<>();
+        for (Account acc : accounts) {
+            java.util.Map<String, Object> m = new HashMap<>();
+            String accNum = acc.getAccountNumber();
+            m.put("accountId", accNum);
+            double val = 0.0;
+            try {
+                int h = accNum != null ? Math.abs(accNum.hashCode()) : 0;
+                // deterministic static value between 0.00 and 49.99
+                val = (h % 5000) / 100.0;
+            } catch (Exception ex) {
+                val = 0.0;
+            }
+            // round to 2 decimals
+            m.put("projectedAnnualReturn", Math.round(val * 100.0) / 100.0);
+            m.put("recommendationReason", "Static projection");
+            out.add(m);
+        }
+        return out;
     }
 
-    /**
-     * Get monthly aggregated spending across all registered cards
-     * 
-     * @param month Month in YYYY-MM format (e.g., 2025-10)
-     * @return Map of account details to spending summaries
-     */
-    @SuppressWarnings("null")
-    @GetMapping("/spending/{month}")
-    public Map<String, Map<String, Object>> getMonthlySpending(@PathVariable("month") String month) {
-        // Validate month format
-        if (!month.matches("\\d{4}-\\d{2}")) {
-            throw new IllegalArgumentException("Month must be in YYYY-MM format");
+    @CrossOrigin(origins = "http://localhost:5173")
+    @GetMapping("/rewards/accounts/{id}")
+    public java.util.Map<String, Object> getRewardsForAccount(@PathVariable("id") String id) {
+        java.util.Map<String, Object> m = new HashMap<>();
+        m.put("accountId", id);
+        if (!accountRepository.existsById(id)) {
+            m.put("projectedAnnualReturn", 0.0);
+            m.put("recommendationReason", "Account not found");
+            return m;
         }
-        
-        // Get all accounts
-        List<Account> accounts = dataService.getAccounts();
-        Map<String, Map<String, Object>> result = new HashMap<>();
-        
-        // Process each account
-        for (Account account : accounts) {
-            String startDate = month + "-01";
-            String endDate = month + "-31"; // This works for our purpose since invalid dates will be handled by the search
-            
-            // Get transactions for this account in the specified month
-            List<Transaction> transactions = dataService.searchTransactions(
-                null, startDate, endDate, account.getAccountNumber());
-            
-            // Calculate spending metrics
-            double totalSpent = transactions.stream()
-                .filter(t -> t.getAmount() < 0) // Only include expenses (negative amounts)
-                .mapToDouble(t -> Math.abs(t.getAmount()))
-                .sum();
-                
-            // Get spending breakdown by category
-            Map<String, Double> categoryBreakdown = new HashMap<>();
-            transactions.stream()
-                .filter(t -> t.getAmount() < 0)
-                .forEach(t -> {
-                    String category = t.getCategory();
-                    if (category == null || category.isEmpty()) {
-                        // Try to determine category from description
-                        category = rewardsService.determineCategory(t);
-                    }
-                    categoryBreakdown.merge(category, Math.abs(t.getAmount()), Double::sum);
-                });
-            
-            
-            // Create summary for this account
-            Map<String, Object> accountSummary = new HashMap<>();
-            accountSummary.put("accountName", account.getAccountName());
-            accountSummary.put("totalSpent", totalSpent);
-            accountSummary.put("transactionCount", transactions.size());
-        
-            
-            // Add to result
-            result.put(String.valueOf(account.getAccountNumber()), accountSummary);
+        double val = 0.0;
+        try {
+            int h = id != null ? Math.abs(id.hashCode()) : 0;
+            val = (h % 5000) / 100.0;
+        } catch (Exception ex) {
+            val = 0.0;
         }
-        
-        return result;
+        m.put("projectedAnnualReturn", Math.round(val * 100.0) / 100.0);
+        m.put("recommendationReason", "Static projection");
+        return m;
     }
+
 }

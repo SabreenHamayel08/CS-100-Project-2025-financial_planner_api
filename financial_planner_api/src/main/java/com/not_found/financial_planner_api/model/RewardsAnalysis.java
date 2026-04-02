@@ -26,7 +26,7 @@ public class RewardsAnalysis {
         private double totalPointsEarned;
         private double estimatedCashValue;
         private Map<String, Double> pointsByCategory;
-        private List<String> missedOpportunities;
+        private int missedOpportunities;
     }
 
     @Getter

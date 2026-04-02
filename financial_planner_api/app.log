@@ -1,0 +1,58 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2025-11-21T13:32:45.509-06:00  INFO 6068 --- [financial_planner_api] [           main] c.n.f.FinancialPlannerApiApplication     : Starting FinancialPlannerApiApplication v0.0.1-SNAPSHOT using Java 25.0.1 with PID 6068 (/Users/20shamayel08/Documents/Programs/CS 100 Project 2025/financial_planner_api/target/financial_planner_api-0.0.1-SNAPSHOT.jar started by 20shamayel08 in /Users/20shamayel08/Documents/Programs/CS 100 Project 2025/financial_planner_api)
+2025-11-21T13:32:45.510-06:00 DEBUG 6068 --- [financial_planner_api] [           main] c.n.f.FinancialPlannerApiApplication     : Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-11-21T13:32:45.510-06:00  INFO 6068 --- [financial_planner_api] [           main] c.n.f.FinancialPlannerApiApplication     : No active profile set, falling back to 1 default profile: "default"
+2025-11-21T13:32:45.899-06:00  INFO 6068 --- [financial_planner_api] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-21T13:32:45.931-06:00  INFO 6068 --- [financial_planner_api] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 27 ms. Found 6 JPA repository interfaces.
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (jar:nested:/Users/20shamayel08/Documents/Programs/CS 100 Project 2025/financial_planner_api/target/financial_planner_api-0.0.1-SNAPSHOT.jar/!BOOT-INF/lib/tomcat-embed-core-10.1.16.jar!/)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2025-11-21T13:32:46.220-06:00  INFO 6068 --- [financial_planner_api] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-11-21T13:32:46.225-06:00  INFO 6068 --- [financial_planner_api] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-11-21T13:32:46.226-06:00  INFO 6068 --- [financial_planner_api] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-11-21T13:32:46.243-06:00  INFO 6068 --- [financial_planner_api] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-11-21T13:32:46.244-06:00  INFO 6068 --- [financial_planner_api] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 692 ms
+2025-11-21T13:32:46.260-06:00  INFO 6068 --- [financial_planner_api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-11-21T13:32:46.378-06:00  INFO 6068 --- [financial_planner_api] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:walletwatch user=SA
+2025-11-21T13:32:46.379-06:00  INFO 6068 --- [financial_planner_api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-11-21T13:32:46.385-06:00  INFO 6068 --- [financial_planner_api] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:walletwatch'
+2025-11-21T13:32:46.512-06:00  INFO 6068 --- [financial_planner_api] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-11-21T13:32:46.550-06:00  INFO 6068 --- [financial_planner_api] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.3.1.Final
+2025-11-21T13:32:46.569-06:00  INFO 6068 --- [financial_planner_api] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-11-21T13:32:46.707-06:00  INFO 6068 --- [financial_planner_api] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-21T13:32:46.732-06:00  WARN 6068 --- [financial_planner_api] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-11-21T13:32:47.183-06:00  INFO 6068 --- [financial_planner_api] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-11-21T13:32:47.184-06:00  INFO 6068 --- [financial_planner_api] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-21T13:32:47.382-06:00  INFO 6068 --- [financial_planner_api] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-11-21T13:32:47.717-06:00  WARN 6068 --- [financial_planner_api] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-21T13:32:47.893-06:00  WARN 6068 --- [financial_planner_api] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2025-11-21T13:32:47.894-06:00  INFO 6068 --- [financial_planner_api] [           main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-11-21T13:32:47.895-06:00  INFO 6068 --- [financial_planner_api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-11-21T13:32:47.896-06:00  INFO 6068 --- [financial_planner_api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-11-21T13:32:47.903-06:00  INFO 6068 --- [financial_planner_api] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-11-21T13:32:47.911-06:00 ERROR 6068 --- [financial_planner_api] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+

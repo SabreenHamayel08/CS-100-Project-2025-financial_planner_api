@@ -10,4 +10,5 @@ import java.util.List;
 public interface AccountRepository extends JpaRepository<AccountEntity, String> {
     List<AccountEntity> findByUserId(String userId);
     List<AccountEntity> findByAccountType(String accountType);
+    List<AccountEntity> findByCardId(String cardId);
 }

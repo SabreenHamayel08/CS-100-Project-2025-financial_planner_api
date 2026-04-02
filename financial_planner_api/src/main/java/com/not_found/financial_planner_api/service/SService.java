@@ -10,7 +10,6 @@ import com.not_found.financial_planner_api.entity.TransactionEntity;
  
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -233,41 +232,7 @@ public class SService {
                 })
                 .collect(Collectors.toList());
     }
-    public Map<String, Double> predictIncomeTrend() {
-
-    List<Object[]> rows = transactionRepository.getMonthlyTotals();
-
-    int n = rows.size();
-    double[] x = new double[n];
-    double[] y = new double[n];
-
-    for (int i = 0; i < n; i++) {
-        Double amount = ((Number) rows.get(i)[1]).doubleValue();
-
-        x[i] = i + 1;   // month index
-        y[i] = amount;
-    }
-
-    // --- Linear regression calculations ---
-    double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
-
-    for (int i = 0; i < n; i++) {
-        sumX += x[i];
-        sumY += y[i];
-        sumXY += x[i] * y[i];
-        sumXX += x[i] * x[i];
-    }
-
-    double slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    double intercept = (sumY - slope * sumX) / n;
-
-    Map<String, Double> forecast = new LinkedHashMap<>();
-    forecast.put("nextMonth", intercept + slope * (n + 1));
-    forecast.put("twoMonthsFromNow", intercept + slope * (n + 2));
-    forecast.put("threeMonthsFromNow", intercept + slope * (n + 3));
-
-    return forecast;
-}
+    
 
 
     

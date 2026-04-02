@@ -1,6 +1,7 @@
 package com.not_found.financial_planner_api.repository;
 
 import com.not_found.financial_planner_api.entity.TransactionEntity;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -36,4 +37,20 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
         ORDER BY month
     """)
 List<Object[]> getMonthlyTotals();
+    @Query("""
+        SELECT FUNCTION('MONTH',t.transactionDate) AS month, SUM(t.transactionAmount)
+        FROM TransactionEntity t
+        WHERE t.transactionAmount > 0 AND t.accountNumber = :id
+        GROUP BY FUNCTION('MONTH', t.transactionDate)
+        """)
+    List<Object[]> getMonthlyTotalsForAccount(String id);
+    @Query("""
+        SELECT t.transactionCategory, SUM(t.transactionAmount)
+        FROM TransactionEntity t
+        WHERE t.transactionAmount < 0 AND t.accountNumber = :id
+        GROUP BY t.transactionCategory
+    """)
+    List<Object[]> getExpenseTotalsByCategoryForAccount(String id); 
+    @Query("SELECT new com.not_found.financial_planner_api.model.Account(t.accountNumber, t.transactionDate, t.transactionAmount, t.transactionCategory) FROM TransactionEntity t WHERE t.accountNumber = :id")
+    List<Object[]> getTransactionsForAccount(String id);
 }
